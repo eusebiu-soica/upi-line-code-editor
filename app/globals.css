@@ -124,3 +124,18 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  /* Resizable panels vertical orientation styles */
+  [data-group][aria-orientation="vertical"] [data-slot="resizable-handle"] {
+    @apply h-px w-full;
+  }
+  
+  [data-group][aria-orientation="vertical"] [data-slot="resizable-handle"]::after {
+    @apply left-0 h-1 w-full translate-x-0 -translate-y-1/2;
+  }
+  
+  [data-group][aria-orientation="vertical"] [data-slot="resizable-handle"] > div {
+    @apply rotate-90;
+  }
+}

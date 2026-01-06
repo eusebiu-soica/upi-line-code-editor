@@ -3,6 +3,8 @@ import { Geist, Geist_Mono, Outfit } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import { ThemeProvider } from "@/components/theme-provider";
+import { FileProvider } from "@/contexts/FileContext";
+import { Toaster } from "sonner";
 
 const outfit = Outfit({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -36,10 +38,13 @@ export default function RootLayout({
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
-            >
+        >
+          <FileProvider>
             <Header />
-        {children}
-      </ThemeProvider>
+            {children}
+            <Toaster position="bottom-right" />
+          </FileProvider>
+        </ThemeProvider>
 
     </body>
     </html >

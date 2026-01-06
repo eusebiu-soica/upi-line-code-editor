@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { LayoutIcon, EyeIcon, FileCode, Folder, FolderArchive, Info } from "lucide-react"
+import { LayoutIcon, EyeIcon, FileCode, Folder, FolderArchive, Info, LayoutDashboard, Eye, EyeOff } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-nobile"
 import {
@@ -20,39 +20,90 @@ import { Download } from "./DownloadButton"
 import Image from "next/image"
 import logo from '@/assets/icon-512x512.png'
 import { InputGroupTooltip } from "./InputGroup"
-
-const openOptions: { title: string; description: string; icon: React.ReactNode; action: () => void }[] = [
-  {
-    title: "Open File",
-    description: "Open a single file from your computer.",
-    icon: <FileCode className="!w-4.5 !h-4.5" />,
-    action: () => {
-      // Placeholder: Implement file opening logic
-      console.log("Open File clicked");
-    },
-  },
-  {
-    title: "Open Folder",
-    description: "Open a folder and load its contents.",
-    icon: <Folder className="!w-4.5 !h-4.5" />,
-    action: () => {
-      // Placeholder: Implement folder opening logic
-      console.log("Open Folder clicked");
-    },
-  },
-  {
-    title: "Open Zip",
-    description: "Open and extract a zip archive.",
-    icon: <FolderArchive className="!w-4.5 !h-4.5"  />,
-    action: () => {
-      // Placeholder: Implement zip opening logic
-      console.log("Open Zip clicked");
-    },
-  },
-]
+import { useFiles } from "@/contexts/FileContext"
+import { openFile, openFolder, openZip } from "@/lib/file-utils"
+import { toast } from "sonner"
 
 export function Header() {
   const isMobile = useIsMobile()
+  const { openFile: addFile, openFiles: addFiles, livePreview, toggleLivePreview, addImage } = useFiles()
+
+  const handleToggleLivePreview = () => {
+    toggleLivePreview()
+    if (livePreview) {
+      toast.info("Live preview disabled. Use CTRL+S to save files.")
+    } else {
+      toast.success("Live preview enabled")
+    }
+  }
+
+  const handleOpenFile = React.useCallback(async () => {
+    try {
+      const file = await openFile()
+      if (file) {
+        addFile(file)
+      }
+    } catch (error) {
+      console.error("Error opening file:", error)
+    }
+  }, [addFile])
+
+  const handleOpenFolder = React.useCallback(async () => {
+    try {
+      const { files, images } = await openFolder()
+      if (files && files.length > 0) {
+        addFiles(files)
+        // Add images to context
+        images.forEach((img) => addImage(img.path, img.dataUrl))
+        const imageMsg = images.length > 0 ? ` and ${images.length} image(s)` : ""
+        toast.success(`Opened ${files.length} file(s)${imageMsg} from folder`)
+      } else {
+        toast.info("No HTML, CSS, or JS files found in the folder")
+      }
+    } catch (error) {
+      console.error("Error opening folder:", error)
+      toast.error("Failed to open folder")
+    }
+  }, [addFiles, addImage])
+
+  const handleOpenZip = React.useCallback(async () => {
+    try {
+      const { files, images } = await openZip()
+      if (files && files.length > 0) {
+        addFiles(files)
+        // Add images to context
+        images.forEach((img) => addImage(img.path, img.dataUrl))
+        const imageMsg = images.length > 0 ? ` and ${images.length} image(s)` : ""
+        toast.success(`Opened ${files.length} file(s)${imageMsg} from zip`)
+      } else {
+        toast.info("No HTML, CSS, or JS files found in the zip")
+      }
+    } catch (error) {
+      console.error("Error opening zip:", error)
+      toast.error("Failed to open zip file")
+    }
+  }, [addFiles, addImage])
+
+  const openOptions: { title: string; description: string; icon: React.ReactNode; action: () => void }[] = [
+    {
+      title: "Open File",
+      description: "Open a single file from your computer.",
+      icon: <FileCode className="!w-4.5 !h-4.5" />,
+      action: handleOpenFile,
+    },
+    {
+      title: "Open Folder",
+      description: "Open a folder and load its contents.",
+      icon: <Folder className="!w-4.5 !h-4.5" />,
+      action: handleOpenFolder,
+    },
+    {
+      title: "Open Zip",
+      description: "Open and extract a zip archive.",
+      icon: <FolderArchive className="!w-4.5 !h-4.5"  />,
+      action: handleOpenZip,
+    },
+  ]
 
   return (
     <div className="flex flex-row items-center justify-between w-full p-4 px-6 shadow-sm border-b bg-background">
@@ -90,8 +141,15 @@ export function Header() {
       </div>
       <div className="flex items-center gap-2">
         <div className="hidden sm:flex items-center gap-2">
-          <Button variant="ghost" size="icon"><EyeIcon/></Button>
-          <Button variant="ghost" size="icon"><LayoutIcon /></Button>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={handleToggleLivePreview}
+            title={livePreview ? "Disable live preview" : "Enable live preview"}
+          >
+            {livePreview ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+          </Button>
+          <Button variant="ghost" size="icon"><LayoutDashboard strokeWidth={2} /></Button>
           <ThemeToggle />
           <Button variant="ghost" size="icon"><Info /></Button>
         </div>
