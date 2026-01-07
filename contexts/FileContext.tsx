@@ -24,6 +24,7 @@ interface FileContextType {
   images: Map<string, string> // Map of image path -> base64 data URL
   layoutOrientation: LayoutOrientation
   layoutPosition: LayoutPosition
+  projectName: string
   openFile: (file: EditorFile) => void
   openFiles: (files: EditorFile[]) => void
   closeFile: (fileId: string) => void
@@ -38,6 +39,7 @@ interface FileContextType {
   addImage: (path: string, dataUrl: string) => void
   getImage: (path: string) => string | undefined
   setLayout: (orientation: LayoutOrientation, position: LayoutPosition) => void
+  setProjectName: (name: string) => void
 }
 
 const FileContext = React.createContext<FileContextType | undefined>(undefined)
@@ -86,6 +88,7 @@ export function FileProvider({ children }: { children: React.ReactNode }) {
   const [images, setImages] = React.useState<Map<string, string>>(new Map())
   const [layoutOrientation, setLayoutOrientation] = React.useState<LayoutOrientation>("vertical")
   const [layoutPosition, setLayoutPosition] = React.useState<LayoutPosition>("preview-top")
+  const [projectName, setProjectName] = React.useState<string>("upi-line-new-project")
 
   const openFile = React.useCallback((file: EditorFile) => {
     setFiles((prev) => {
@@ -315,6 +318,10 @@ export function FileProvider({ children }: { children: React.ReactNode }) {
     setLayoutPosition(position)
   }, [])
 
+  const setProjectNameHandler = React.useCallback((name: string) => {
+    setProjectName(name.trim() || "upi-line-new-project")
+  }, [])
+
   const value = React.useMemo(
     () => ({
       files,
@@ -323,6 +330,7 @@ export function FileProvider({ children }: { children: React.ReactNode }) {
       images,
       layoutOrientation,
       layoutPosition,
+      projectName,
       openFile,
       openFiles,
       closeFile,
@@ -338,8 +346,9 @@ export function FileProvider({ children }: { children: React.ReactNode }) {
       addImage,
       getImage,
       setLayout,
+      setProjectName: setProjectNameHandler,
     }),
-    [files, activeFileId, livePreview, images, layoutOrientation, layoutPosition, openFile, openFiles, closeFile, updateFileContent, setActiveFile, getFileById, getFilesByType, clearAllFiles, toggleLivePreview, saveFile, refreshPreview, previewRefreshTrigger, addImage, getImage, setLayout]
+    [files, activeFileId, livePreview, images, layoutOrientation, layoutPosition, projectName, openFile, openFiles, closeFile, updateFileContent, setActiveFile, getFileById, getFilesByType, clearAllFiles, toggleLivePreview, saveFile, refreshPreview, previewRefreshTrigger, addImage, getImage, setLayout, setProjectNameHandler]
   )
 
   return <FileContext.Provider value={value}>{children}</FileContext.Provider>
@@ -356,7 +365,7 @@ export function useFiles() {
 // Helper function to determine file type from extension
 export function getFileTypeFromPath(path: string): FileType {
   const ext = path.split(".").pop()?.toLowerCase()
-  if (ext === "html" || ext === "htm") return "html"
+  if (ext === "html" || ext === "htm" || ext === "svg") return "html" // SVG files are treated as HTML
   if (ext === "css") return "css"
   if (ext === "js" || ext === "javascript") return "js"
   return "other"

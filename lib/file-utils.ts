@@ -6,10 +6,10 @@ export interface ImageData {
   dataUrl: string
 }
 
-// Check if a file is an image
+// Check if a file is an image (excluding SVG which is treated as code)
 export function isImageFile(fileName: string): boolean {
   const ext = fileName.split(".").pop()?.toLowerCase()
-  return ["jpg", "jpeg", "png", "gif", "svg", "webp", "bmp", "ico"].includes(ext || "")
+  return ["jpg", "jpeg", "png", "gif", "webp", "bmp", "ico"].includes(ext || "")
 }
 
 // Convert image file to base64 data URL
@@ -68,7 +68,7 @@ export async function processFiles(files: FileList | File[]): Promise<EditorFile
   const promises = fileArray
     .filter((file) => {
       const ext = file.name.split(".").pop()?.toLowerCase()
-      return ext === "html" || ext === "htm" || ext === "css" || ext === "js" || ext === "javascript"
+      return ext === "html" || ext === "htm" || ext === "css" || ext === "js" || ext === "javascript" || ext === "svg"
     })
     .map(processFile)
   return Promise.all(promises)
@@ -86,7 +86,7 @@ async function processDirectoryEntry(
     const ext = file.name.split(".").pop()?.toLowerCase()
     const relativePath = basePath ? `${basePath}/${file.name}` : file.name
     
-    if (ext === "html" || ext === "htm" || ext === "css" || ext === "js" || ext === "javascript") {
+    if (ext === "html" || ext === "htm" || ext === "css" || ext === "js" || ext === "javascript" || ext === "svg") {
       const content = await readFileAsText(file)
       files.push(createEditorFileFromPath(file.name, relativePath, content))
     } else if (isImageFile(file.name)) {
@@ -145,7 +145,7 @@ export async function openFolder(): Promise<{ files: EditorFile[]; images: Image
           // Use webkitRelativePath if available to preserve folder structure
           const relativePath = (file as any).webkitRelativePath || file.name
           
-          if (ext === "html" || ext === "htm" || ext === "css" || ext === "js" || ext === "javascript") {
+          if (ext === "html" || ext === "htm" || ext === "css" || ext === "js" || ext === "javascript" || ext === "svg") {
             const content = await readFileAsText(file)
             const fileName = relativePath.split('/').pop() || file.name
             files.push(createEditorFileFromPath(fileName, relativePath, content))
@@ -166,7 +166,7 @@ export async function openFile(): Promise<EditorFile | null> {
   return new Promise((resolve) => {
     const input = document.createElement("input")
     input.type = "file"
-    input.accept = ".html,.htm,.css,.js,.javascript"
+    input.accept = ".html,.htm,.css,.js,.javascript,.svg"
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (file) {
@@ -189,14 +189,14 @@ async function extractZipFiles(zip: JSZip): Promise<{ files: EditorFile[]; image
   zip.forEach((relativePath, file) => {
     if (!file.dir) {
       const ext = relativePath.split(".").pop()?.toLowerCase()
-      if (ext === "html" || ext === "htm" || ext === "css" || ext === "js" || ext === "javascript") {
+      if (ext === "html" || ext === "htm" || ext === "css" || ext === "js" || ext === "javascript" || ext === "svg") {
         promises.push(
           file.async("string").then((content) => {
             const fileName = relativePath.split('/').pop() || relativePath
             files.push(createEditorFileFromPath(fileName, relativePath, content))
           })
         )
-      } else if (isImageFile(relativePath)) {
+      } else if (isImageFile(relativePath) && ext !== "svg") {
         promises.push(
           file.async("base64").then((base64) => {
             // Determine MIME type from extension

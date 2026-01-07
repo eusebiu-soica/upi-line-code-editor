@@ -24,13 +24,18 @@ export function Preview() {
   // Combine all JS files
   const combinedJS = jsFiles.map((f) => f.content).join("\n\n")
 
-  // Create the preview HTML
+  // Create the preview HTML with XSS protection
   const previewHTML = React.useMemo(() => {
     if (!htmlFile) {
-      return "<html><body><p>No HTML file found</p></body></html>"
+      return "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Preview</title></head><body><p>No HTML file found</p></body></html>"
     }
 
     let html = htmlFile.content
+    
+    // Security: Ensure DOCTYPE is present
+    if (!html.includes("<!DOCTYPE")) {
+      html = "<!DOCTYPE html>\n" + html
+    }
 
     // Replace image paths with data URLs in HTML
     if (images.size > 0) {

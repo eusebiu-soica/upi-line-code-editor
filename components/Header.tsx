@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { LayoutIcon, EyeIcon, FileCode, Folder, FolderArchive, Info, LayoutDashboard, Eye, EyeOff } from "lucide-react"
+import { LayoutIcon, EyeIcon, FileCode, Folder, FolderArchive, Info, LayoutDashboard, Eye, EyeOff, LayoutGrid } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-nobile"
 import {
@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input"
 import { ThemeToggle } from "./theme-toggle"
 import { Download } from "./DownloadButton"
 import Image from "next/image"
-import logo from '@/assets/icon-512x512.png'
+import logo from '@/public/logo.png'
 import { InputGroupTooltip } from "./InputGroup"
 import { useFiles } from "@/contexts/FileContext"
 import { openFile, openFolder, openZip } from "@/lib/file-utils"
@@ -121,7 +121,7 @@ export function Header() {
       {/* Left section: Logo and Navigation (hidden on mobile) */}
       <div className="hidden md:flex gap-2 items-center flex-shrink-0">
         <div className="mr-4 lg:mr-6">
-          <Image src={logo} alt="Upi-Line Logo" width={35} height={35} className="w-8 h-8 lg:w-[35px] lg:h-[35px]" />
+          <Image src={logo} alt="Upi-Line Logo" width={35} height={35} className="w-8 h-9! lg:w-[35px] lg:h-[35px]" />
         </div>
         <NavigationMenu viewport={isMobile}>
           <NavigationMenuList className="flex-wrap">
@@ -206,7 +206,7 @@ export function Header() {
               <TooltipTrigger asChild>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9">
-                    <LayoutDashboard strokeWidth={2} className="w-4 h-4" />
+                    <LayoutGrid strokeWidth={2} className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
               </TooltipTrigger>
