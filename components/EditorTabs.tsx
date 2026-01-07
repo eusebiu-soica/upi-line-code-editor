@@ -6,6 +6,7 @@ import { useFiles, type EditorFile } from "@/contexts/FileContext"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 export function EditorTabs() {
   const { files, activeFileId, setActiveFile, closeFile, getFileById, updateFileContent } = useFiles()
@@ -85,33 +86,51 @@ export function EditorTabs() {
         ))}
       </div>
       <div className="flex items-center gap-1 px-2 border-l">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8"
-          onClick={handleClearEditor}
-          title="Clear editor"
-        >
-          <Trash2 className="w-4 h-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8"
-          onClick={handleCopyCode}
-          title="Copy code"
-        >
-          <Copy className="w-4 h-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8"
-          onClick={handlePasteCode}
-          title="Paste code"
-        >
-          <ClipboardPaste className="w-4 h-4" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={handleClearEditor}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Clear editor</p>
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={handleCopyCode}
+            >
+              <Copy className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Copy code</p>
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={handlePasteCode}
+            >
+              <ClipboardPaste className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Paste code</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
     </div>
   )

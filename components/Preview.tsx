@@ -132,11 +132,28 @@ export function Preview() {
     }
   }, [previewHTML, updateIframe])
 
-  // Update iframe content when live preview is enabled (auto-update)
+  // Debounce timer for live preview updates
+  const debounceTimerRef = React.useRef<NodeJS.Timeout | null>(null)
+
+  // Update iframe content when live preview is enabled (auto-update with debounce)
   React.useEffect(() => {
     if (livePreview && previewHTML !== lastPreviewHTMLRef.current && !isInitialMountRef.current) {
-      updateIframe()
-      lastPreviewHTMLRef.current = previewHTML
+      // Clear existing timer
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+      }
+
+      // Debounce the update (500ms delay)
+      debounceTimerRef.current = setTimeout(() => {
+        updateIframe()
+        lastPreviewHTMLRef.current = previewHTML
+      }, 500)
+    }
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+      }
     }
   }, [previewHTML, livePreview, updateIframe])
 

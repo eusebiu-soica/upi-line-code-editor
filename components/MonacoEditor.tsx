@@ -4,7 +4,6 @@ import * as React from "react"
 import Editor from "@monaco-editor/react"
 import { useFiles } from "@/contexts/FileContext"
 import type { editor } from "monaco-editor"
-import * as monaco from "monaco-editor"
 import { useHotkeys } from "react-hotkeys-hook"
 import { toast } from "sonner"
 import { useTheme } from "next-themes"
@@ -14,12 +13,23 @@ export function MonacoEditor() {
   const { theme: appTheme, resolvedTheme } = useTheme()
   const activeFile = files.find((f) => f.id === activeFileId)
   const editorRef = React.useRef<editor.IStandaloneCodeEditor | null>(null)
-  const saveActionRef = React.useRef<monaco.IDisposable | null>(null)
+  const saveActionRef = React.useRef<{ dispose: () => void } | null>(null)
+  const [monacoModule, setMonacoModule] = React.useState<typeof import("monaco-editor") | null>(null)
+
+  // Dynamically import monaco-editor only on client side
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      import("monaco-editor").then((monaco) => {
+        setMonacoModule(monaco)
+      })
+    }
+  }, [])
 
   // Map app theme to Monaco theme
   const monacoTheme = React.useMemo(() => {
+    if (typeof window === "undefined") return "vs"
     const theme = resolvedTheme || appTheme || "system"
-    if (theme === "dark" || (theme === "system" && typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+    if (theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
       return "vs-dark"
     }
     return "vs"
@@ -40,6 +50,8 @@ export function MonacoEditor() {
   const handleEditorDidMount = React.useCallback((editorInstance: editor.IStandaloneCodeEditor) => {
     editorRef.current = editorInstance
     
+    if (!monacoModule) return
+    
     // Remove existing save action if it exists
     if (saveActionRef.current) {
       saveActionRef.current.dispose()
@@ -50,7 +62,7 @@ export function MonacoEditor() {
       id: "custom-save",
       label: "Save",
       keybindings: [
-        monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS
+        monacoModule.KeyMod.CtrlCmd | monacoModule.KeyCode.KeyS
       ],
       run: () => {
         handleSave()
@@ -58,11 +70,11 @@ export function MonacoEditor() {
     })
     
     saveActionRef.current = saveAction
-  }, [handleSave])
+  }, [handleSave, monacoModule])
 
   // Update action when livePreview or activeFileId changes
   React.useEffect(() => {
-    if (editorRef.current && activeFileId) {
+    if (editorRef.current && activeFileId && monacoModule) {
       // Remove old action
       if (saveActionRef.current) {
         saveActionRef.current.dispose()
@@ -73,7 +85,7 @@ export function MonacoEditor() {
         id: "custom-save",
         label: "Save",
         keybindings: [
-          monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS
+          monacoModule.KeyMod.CtrlCmd | monacoModule.KeyCode.KeyS
         ],
         run: () => {
           handleSave()
@@ -88,14 +100,38 @@ export function MonacoEditor() {
         saveActionRef.current.dispose()
       }
     }
-  }, [livePreview, activeFileId, handleSave])
+  }, [livePreview, activeFileId, handleSave, monacoModule])
+
+  // Debounce timer for live preview
+  const debounceTimerRef = React.useRef<NodeJS.Timeout | null>(null)
 
   const handleEditorChange = (value: string | undefined) => {
     if (activeFileId && value !== undefined) {
-      // Only mark as dirty if live preview is disabled
-      updateFileContent(activeFileId, value, !livePreview)
+      // Clear existing timer
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+      }
+
+      if (livePreview) {
+        // Debounce live preview updates (500ms delay)
+        debounceTimerRef.current = setTimeout(() => {
+          updateFileContent(activeFileId, value, false)
+        }, 500)
+      } else {
+        // No debounce when live preview is disabled, mark as dirty immediately
+        updateFileContent(activeFileId, value, true)
+      }
     }
   }
+
+  // Cleanup timer on unmount
+  React.useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+      }
+    }
+  }, [])
 
   // Also handle with useHotkeys as fallback for when editor doesn't have focus
   useHotkeys(

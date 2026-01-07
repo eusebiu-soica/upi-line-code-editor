@@ -4,6 +4,9 @@ import * as React from "react"
 
 export type FileType = "html" | "css" | "js" | "other"
 
+export type LayoutOrientation = "vertical" | "horizontal"
+export type LayoutPosition = "preview-top" | "preview-bottom" | "preview-left" | "preview-right"
+
 export interface EditorFile {
   id: string
   name: string
@@ -19,6 +22,8 @@ interface FileContextType {
   livePreview: boolean
   previewRefreshTrigger: number
   images: Map<string, string> // Map of image path -> base64 data URL
+  layoutOrientation: LayoutOrientation
+  layoutPosition: LayoutPosition
   openFile: (file: EditorFile) => void
   openFiles: (files: EditorFile[]) => void
   closeFile: (fileId: string) => void
@@ -32,6 +37,7 @@ interface FileContextType {
   refreshPreview: () => void
   addImage: (path: string, dataUrl: string) => void
   getImage: (path: string) => string | undefined
+  setLayout: (orientation: LayoutOrientation, position: LayoutPosition) => void
 }
 
 const FileContext = React.createContext<FileContextType | undefined>(undefined)
@@ -49,7 +55,7 @@ export function FileProvider({ children }: { children: React.ReactNode }) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Upi Line | Document</title>
     
 </head>
 <body>
@@ -62,22 +68,14 @@ export function FileProvider({ children }: { children: React.ReactNode }) {
         id: "default-css",
         name: "style.css",
         path: "style.css",
-        content: `body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 20px;
-}
-
-h1 {
-    color: #333;
-}`,
+        content: "/* Write your CSS code here */",
         type: "css",
       },
       {
         id: "default-js",
         name: "script.js",
         path: "script.js",
-        content: `console.log('Hello from JavaScript!');`,
+        content: `//Write your JavaScript code here`,
         type: "js",
       },
     ]
@@ -86,6 +84,8 @@ h1 {
   const [livePreview, setLivePreview] = React.useState<boolean>(true)
   const [previewRefreshTrigger, setPreviewRefreshTrigger] = React.useState(0)
   const [images, setImages] = React.useState<Map<string, string>>(new Map())
+  const [layoutOrientation, setLayoutOrientation] = React.useState<LayoutOrientation>("vertical")
+  const [layoutPosition, setLayoutPosition] = React.useState<LayoutPosition>("preview-top")
 
   const openFile = React.useCallback((file: EditorFile) => {
     setFiles((prev) => {
@@ -174,11 +174,6 @@ h1 {
           (f) => f.type === file.type && !f.id.startsWith("default-")
         )
 
-        // Only replace default file if:
-        // 1. There are no non-default files of this type yet (first file of this type)
-        // 2. There's a default file of the same type
-        // 3. It's not an "other" type
-        // 4. We haven't already replaced a default of this type in this batch
         if (
           nonDefaultFilesOfSameType.length === 0 && 
           file.type !== "other" &&
@@ -272,7 +267,7 @@ h1 {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Upi Line | Document</title>
 </head>
 <body>
     <h1>Hello World</h1>
@@ -315,12 +310,19 @@ h1 {
     return images.get(path)
   }, [images])
 
+  const setLayout = React.useCallback((orientation: LayoutOrientation, position: LayoutPosition) => {
+    setLayoutOrientation(orientation)
+    setLayoutPosition(position)
+  }, [])
+
   const value = React.useMemo(
     () => ({
       files,
       activeFileId,
       livePreview,
       images,
+      layoutOrientation,
+      layoutPosition,
       openFile,
       openFiles,
       closeFile,
@@ -335,8 +337,9 @@ h1 {
       previewRefreshTrigger,
       addImage,
       getImage,
+      setLayout,
     }),
-    [files, activeFileId, livePreview, images, openFile, openFiles, closeFile, updateFileContent, setActiveFile, getFileById, getFilesByType, clearAllFiles, toggleLivePreview, saveFile, refreshPreview, previewRefreshTrigger, addImage, getImage]
+    [files, activeFileId, livePreview, images, layoutOrientation, layoutPosition, openFile, openFiles, closeFile, updateFileContent, setActiveFile, getFileById, getFilesByType, clearAllFiles, toggleLivePreview, saveFile, refreshPreview, previewRefreshTrigger, addImage, getImage, setLayout]
   )
 
   return <FileContext.Provider value={value}>{children}</FileContext.Provider>

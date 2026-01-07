@@ -23,10 +23,21 @@ import { InputGroupTooltip } from "./InputGroup"
 import { useFiles } from "@/contexts/FileContext"
 import { openFile, openFolder, openZip } from "@/lib/file-utils"
 import { toast } from "sonner"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { Badge } from "@/components/ui/badge"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { LayoutOrientation, LayoutPosition } from "@/contexts/FileContext"
+import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Split } from "lucide-react"
 
 export function Header() {
   const isMobile = useIsMobile()
-  const { openFile: addFile, openFiles: addFiles, livePreview, toggleLivePreview, addImage } = useFiles()
+  const { openFile: addFile, openFiles: addFiles, livePreview, toggleLivePreview, addImage, layoutOrientation, layoutPosition, setLayout } = useFiles()
 
   const handleToggleLivePreview = () => {
     toggleLivePreview()
@@ -88,37 +99,36 @@ export function Header() {
     {
       title: "Open File",
       description: "Open a single file from your computer.",
-      icon: <FileCode className="!w-4.5 !h-4.5" />,
+      icon: <FileCode className="w-4.5! h-4.5! text-muted-foreground! hover:text-muted-foreground!" />,
       action: handleOpenFile,
     },
     {
       title: "Open Folder",
       description: "Open a folder and load its contents.",
-      icon: <Folder className="!w-4.5 !h-4.5" />,
+      icon: <Folder className="w-4.5! h-4.5! text-muted-foreground! hover:text-muted-foreground!" />,
       action: handleOpenFolder,
     },
     {
       title: "Open Zip",
       description: "Open and extract a zip archive.",
-      icon: <FolderArchive className="!w-4.5 !h-4.5"  />,
+      icon: <FolderArchive className="w-4.5! h-4.5! text-muted-foreground! hover:text-muted-foreground!"  />,
       action: handleOpenZip,
     },
   ]
 
   return (
-    <div className="flex flex-row items-center justify-between w-full p-4 px-6 shadow-sm border-b bg-background">
-      <div className="hidden md:flex gap-2">
-        <div className="mr-6">
-          <Image src={logo} alt="Upi-Line Logo" width={35} height={35} />
+    <div className="flex flex-row items-center justify-between w-full p-2 sm:p-4 px-3 sm:px-6 shadow-sm border-b bg-background gap-2">
+      {/* Left section: Logo and Navigation (hidden on mobile) */}
+      <div className="hidden md:flex gap-2 items-center flex-shrink-0">
+        <div className="mr-4 lg:mr-6">
+          <Image src={logo} alt="Upi-Line Logo" width={35} height={35} className="w-8 h-8 lg:w-[35px] lg:h-[35px]" />
         </div>
         <NavigationMenu viewport={isMobile}>
           <NavigationMenuList className="flex-wrap">
-
             <NavigationMenuItem>
               <NavigationMenuTrigger>Open</NavigationMenuTrigger>
               <NavigationMenuContent className="p-1">
                 <ul className="grid w-[270px] gap-2">
-
                   {openOptions.map((option) => (
                     <ListItem
                       key={option.title}
@@ -128,36 +138,169 @@ export function Header() {
                       icon={option.icon}
                     />
                   ))}
-
                 </ul>
               </NavigationMenuContent>
             </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
-        <Button variant="ghost">Compare the code</Button>
+        <Button variant="ghost" className="hidden md:flex">Compare the code</Button>
       </div>
-      <div className="flex-1 flex justify-center w-full">
-        <InputGroupTooltip type="text" tooltipText="This name will be used for the project folder." inputPlaceholder="Project name" />
+
+      {/* Mobile menu button (only on mobile/tablet under 1024px) */}
+      <div className="md:hidden flex items-center gap-2">
+        <Image src={logo} alt="Upi-Line Logo" width={28} height={28} className="w-7 h-7" />
+        <NavigationMenu>
+          <NavigationMenuList>
+            <NavigationMenuItem>
+              <NavigationMenuTrigger className="text-sm">Open</NavigationMenuTrigger>
+              <NavigationMenuContent className="p-1">
+                <ul className="grid w-[270px] gap-2">
+                  {openOptions.map((option) => (
+                    <ListItem
+                      key={option.title}
+                      title={option.title}
+                      onClick={option.action}
+                      description={option.description}
+                      icon={option.icon}
+                    />
+                  ))}
+                </ul>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenu>
       </div>
-      <div className="flex items-center gap-2">
-        <div className="hidden sm:flex items-center gap-2">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={handleToggleLivePreview}
-            title={livePreview ? "Disable live preview" : "Enable live preview"}
-          >
-            {livePreview ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-          </Button>
-          <Button variant="ghost" size="icon"><LayoutDashboard strokeWidth={2} /></Button>
-          <ThemeToggle />
-          <Button variant="ghost" size="icon"><Info /></Button>
+
+      {/* Center section: Project name input */}
+      <div className="flex-1 flex justify-center min-w-0">
+        <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
+          <InputGroupTooltip type="text" tooltipText="This name will be used for the project folder." inputPlaceholder="Project name" />
         </div>
       </div>
-      <div className="ml-6">
-        <Download />
+
+      {/* Right section: Action buttons */}
+      <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+        {/* Desktop/Tablet buttons */}
+        <div className="hidden sm:flex items-center gap-1 sm:gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="h-8 w-8 sm:h-9 sm:w-9 relative"
+                onClick={handleToggleLivePreview}
+              >
+                {livePreview ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                <Badge 
+                  className={`absolute top-0 right-0 h-2 w-2 p-0 border-0 ${livePreview ? 'bg-green-500' : 'bg-red-500'}`}
+                  variant="default"
+                />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{livePreview ? "Disable live preview" : "Enable live preview"}</p>
+            </TooltipContent>
+          </Tooltip>
+          <DropdownMenu >
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9">
+                    <LayoutDashboard strokeWidth={2} className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Change layout</p>
+              </TooltipContent>
+            </Tooltip>
+            <DropdownMenuContent align="center" className="w-[280px]">
+              <DropdownMenuGroup className="space-y-1">
+                <DropdownMenuItem
+                  onClick={() => setLayout("vertical", "preview-top")}
+                  className="flex items-center gap-3 p-3"
+                >
+                  <Split className="w-4 h-4 text-muted-foreground! hover:text-muted-foreground! rotate-90" />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">Preview Top</span>
+                    <span className="text-xs text-muted-foreground! hover:text-muted-foreground!">Editors at bottom</span>
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setLayout("vertical", "preview-bottom")}
+                  className="flex items-center gap-3 p-3"
+                >
+                  <ArrowDown className="w-4 h-4 text-muted-foreground! hover:text-muted-foreground!" />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">Preview Bottom</span>
+                    <span className="text-xs text-muted-foreground! hover:text-muted-foreground!">Editors at top</span>
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setLayout("horizontal", "preview-left")}
+                  className="flex items-center gap-3 p-3"
+                >
+                  <ArrowLeft className="w-4 h-4 text-muted-foreground! hover:text-muted-foreground!" />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">Preview Left</span>
+                    <span className="text-xs text-muted-foreground! hover:text-muted-foreground!">Editors on right</span>
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setLayout("horizontal", "preview-right")}
+                  className="flex items-center gap-3 p-3"
+                >
+                  <ArrowRight className="w-4 h-4 text-muted-foreground! hover:text-muted-foreground!" />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">Preview Right</span>
+                    <span className="text-xs text-muted-foreground! hover:text-muted-foreground!">Editors on left</span>
+                  </div>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <ThemeToggle />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9">
+                <Info className="w-4 h-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Information</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+
+        {/* Mobile: Only essential buttons */}
+        <div className="sm:hidden flex items-center gap-1">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="h-8 w-8 relative"
+                onClick={handleToggleLivePreview}
+              >
+                {livePreview ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                <Badge 
+                  className={`absolute -top-1 -right-1 h-2 w-2 p-0 border-0 ${livePreview ? 'bg-green-500' : 'bg-red-500'}`}
+                  variant="default"
+                />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{livePreview ? "Disable live preview" : "Enable live preview"}</p>
+            </TooltipContent>
+          </Tooltip>
+          <ThemeToggle />
+        </div>
+
+        {/* Download button */}
+        <div className="ml-1 sm:ml-2 lg:ml-6">
+          <Download />
+        </div>
       </div>
-      
     </div>
   )
 }
