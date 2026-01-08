@@ -121,7 +121,7 @@ export function Header() {
   ]
 
   return (
-    <div className="flex flex-row items-center justify-between w-full p-2 sm:p-4 px-3 sm:px-6 shadow-sm border-b bg-background gap-2">
+    <div className="flex flex-row items-center justify-between w-full p-2 sm:p-4 px-3 sm:px-6 shadow-sm border-b bg-background gap-2 relative z-50">
       {/* Left section: Logo and Navigation (hidden on mobile) */}
       <div className="hidden md:flex gap-2 items-center flex-shrink-0">
         <div className="mr-4 lg:mr-6">
