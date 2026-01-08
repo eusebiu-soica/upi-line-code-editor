@@ -61,7 +61,7 @@ export function FileProvider({ children }: { children: React.ReactNode }) {
     
 </head>
 <body>
-    <h1>Hello World</h1>
+     <h1 style="font-family: Helvetica">Hello Upi :)</h1>
 </body>
 </html>`,
         type: "html",
@@ -273,7 +273,7 @@ export function FileProvider({ children }: { children: React.ReactNode }) {
     <title>Upi Line | Document</title>
 </head>
 <body>
-    <h1>Hello World</h1>
+     <h1 style="font-family: Helvetica">Hello Upi :)</h1>
 </body>
 </html>`,
         type: "html",

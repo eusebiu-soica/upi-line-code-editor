@@ -36,12 +36,12 @@ export function Download() {
                 toast.error("No HTML files to download")
                 return
             }
-            downloadHTML(htmlFiles, projectName)
+            downloadHTML(htmlFiles, projectName, files, images)
             toast.success("HTML file downloaded successfully")
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "Failed to download HTML file")
         }
-    }, [getFilesByType, projectName])
+    }, [getFilesByType, projectName, files, images])
 
     const handleDownloadCSS = React.useCallback(() => {
         try {

@@ -34,10 +34,14 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { LayoutOrientation, LayoutPosition } from "@/contexts/FileContext"
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Split } from "lucide-react"
+import { CompareCodeModal } from "@/components/CompareCodeModal"
+import { InfoModal } from "@/components/InfoModal"
 
 export function Header() {
   const isMobile = useIsMobile()
   const { openFile: addFile, openFiles: addFiles, livePreview, toggleLivePreview, addImage, layoutOrientation, layoutPosition, setLayout } = useFiles()
+  const [compareModalOpen, setCompareModalOpen] = React.useState(false)
+  const [infoModalOpen, setInfoModalOpen] = React.useState(false)
 
   const handleToggleLivePreview = () => {
     toggleLivePreview()
@@ -143,7 +147,13 @@ export function Header() {
             </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
-        <Button variant="ghost" className="hidden md:flex">Compare the code</Button>
+        <Button 
+          variant="ghost" 
+          className="hidden md:flex"
+          onClick={() => setCompareModalOpen(true)}
+        >
+          Compare the code
+        </Button>
       </div>
 
       {/* Mobile menu button (only on mobile/tablet under 1024px) */}
@@ -262,7 +272,12 @@ export function Header() {
           <ThemeToggle />
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 sm:h-9 sm:w-9"
+                onClick={() => setInfoModalOpen(true)}
+              >
                 <Info className="w-4 h-4" />
               </Button>
             </TooltipTrigger>
@@ -301,6 +316,10 @@ export function Header() {
           <Download />
         </div>
       </div>
+
+      {/* Modals */}
+      <CompareCodeModal open={compareModalOpen} onOpenChange={setCompareModalOpen} />
+      <InfoModal open={infoModalOpen} onOpenChange={setInfoModalOpen} />
     </div>
   )
 }
