@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { FileProvider } from "@/contexts/FileContext";
 import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/next"
 
 const outfit = Outfit({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -78,6 +79,7 @@ export default function RootLayout({
             <Header />
             {children}
             <Toaster position="bottom-right" />
+            <Analytics />
           </FileProvider>
         </ThemeProvider>
         <script
