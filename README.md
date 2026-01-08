@@ -10,6 +10,8 @@
 
 **A powerful, modern code editor with live preview for HTML, CSS, and JavaScript**
 
+### 🌐 [Live Demo](https://upi-line-code-editor.vercel.app/)
+
 [Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [Tech Stack](#-tech-stack) • [Contributing](#-contributing)
 
 </div>
@@ -19,6 +21,8 @@
 ## 🎯 Overview
 
 **Upi Line Code Editor** is a full-featured, browser-based code editor built with Next.js and Monaco Editor. It provides a seamless development experience with live preview, file management, and built-in support for Tailwind CSS and jQuery. Perfect for prototyping, learning, or quick web development tasks.
+
+> 🌐 **Try it live:** [https://upi-line-code-editor.vercel.app/](https://upi-line-code-editor.vercel.app/)
 
 ### ✨ Key Highlights
 
