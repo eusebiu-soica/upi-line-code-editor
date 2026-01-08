@@ -1,5 +1,10 @@
 import { MainLayout } from "@/components/MainLayout";
+import { DragDropZone } from "@/components/DragDropZone";
 
 export default function Page() {
-    return <MainLayout />;
+    return (
+        <DragDropZone>
+            <MainLayout />
+        </DragDropZone>
+    );
 }
