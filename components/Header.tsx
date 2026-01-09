@@ -201,7 +201,7 @@ export function Header() {
       {/* Center section: Project name input */}
       <div className="flex-1 flex justify-center min-w-0">
         <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
-          <InputGroupTooltip type="text" tooltipText="This name will be used for the project folder." inputPlaceholder="Project name" />
+          <InputGroupTooltip type="text" tooltipText="This name will be used for the project folder name, zip file or svg file name." inputPlaceholder="Project name" />
         </div>
       </div>
 
