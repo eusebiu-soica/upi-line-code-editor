@@ -7,6 +7,20 @@ export type FileType = "html" | "css" | "js" | "other"
 export type LayoutOrientation = "vertical" | "horizontal"
 export type LayoutPosition = "preview-top" | "preview-bottom" | "preview-left" | "preview-right"
 
+export interface ViewportSize {
+  width: number
+  height: number
+  label: string
+}
+
+export interface ConsoleLog {
+  id: string
+  type: "log" | "error" | "warn" | "info" | "debug" | "table"
+  message: string
+  timestamp: number
+  data?: any[]
+}
+
 export interface EditorFile {
   id: string
   name: string
@@ -25,6 +39,10 @@ interface FileContextType {
   layoutOrientation: LayoutOrientation
   layoutPosition: LayoutPosition
   projectName: string
+  consoleLogs: ConsoleLog[]
+  viewportSize: ViewportSize
+  showConsole: boolean
+  viewportEnabled: boolean
   openFile: (file: EditorFile) => void
   openFiles: (files: EditorFile[]) => void
   closeFile: (fileId: string) => void
@@ -40,6 +58,11 @@ interface FileContextType {
   getImage: (path: string) => string | undefined
   setLayout: (orientation: LayoutOrientation, position: LayoutPosition) => void
   setProjectName: (name: string) => void
+  addConsoleLog: (log: ConsoleLog) => void
+  clearConsoleLogs: () => void
+  setViewportSize: (size: ViewportSize) => void
+  toggleConsole: () => void
+  toggleViewport: () => void
 }
 
 const FileContext = React.createContext<FileContextType | undefined>(undefined)
@@ -89,6 +112,14 @@ export function FileProvider({ children }: { children: React.ReactNode }) {
   const [layoutOrientation, setLayoutOrientation] = React.useState<LayoutOrientation>("vertical")
   const [layoutPosition, setLayoutPosition] = React.useState<LayoutPosition>("preview-top")
   const [projectName, setProjectName] = React.useState<string>("upi-line-new-project")
+  const [consoleLogs, setConsoleLogs] = React.useState<ConsoleLog[]>([])
+  const [viewportSize, setViewportSize] = React.useState<ViewportSize>({
+    width: 1920,
+    height: 1080,
+    label: "Desktop (Full HD)",
+  })
+  const [showConsole, setShowConsole] = React.useState<boolean>(false)
+  const [viewportEnabled, setViewportEnabled] = React.useState<boolean>(false)
 
   const openFile = React.useCallback((file: EditorFile) => {
     setFiles((prev) => {
@@ -322,6 +353,26 @@ export function FileProvider({ children }: { children: React.ReactNode }) {
     setProjectName(name.trim() || "upi-line-new-project")
   }, [])
 
+  const addConsoleLog = React.useCallback((log: ConsoleLog) => {
+    setConsoleLogs((prev) => [...prev, log])
+  }, [])
+
+  const clearConsoleLogs = React.useCallback(() => {
+    setConsoleLogs([])
+  }, [])
+
+  const setViewportSizeHandler = React.useCallback((size: ViewportSize) => {
+    setViewportSize(size)
+  }, [])
+
+  const toggleConsole = React.useCallback(() => {
+    setShowConsole((prev) => !prev)
+  }, [])
+
+  const toggleViewport = React.useCallback(() => {
+    setViewportEnabled((prev) => !prev)
+  }, [])
+
   const value = React.useMemo(
     () => ({
       files,
@@ -331,6 +382,10 @@ export function FileProvider({ children }: { children: React.ReactNode }) {
       layoutOrientation,
       layoutPosition,
       projectName,
+      consoleLogs,
+      viewportSize,
+      showConsole,
+      viewportEnabled,
       openFile,
       openFiles,
       closeFile,
@@ -347,8 +402,13 @@ export function FileProvider({ children }: { children: React.ReactNode }) {
       getImage,
       setLayout,
       setProjectName: setProjectNameHandler,
+      addConsoleLog,
+      clearConsoleLogs,
+      setViewportSize: setViewportSizeHandler,
+      toggleConsole,
+      toggleViewport,
     }),
-    [files, activeFileId, livePreview, images, layoutOrientation, layoutPosition, projectName, openFile, openFiles, closeFile, updateFileContent, setActiveFile, getFileById, getFilesByType, clearAllFiles, toggleLivePreview, saveFile, refreshPreview, previewRefreshTrigger, addImage, getImage, setLayout, setProjectNameHandler]
+    [files, activeFileId, livePreview, images, layoutOrientation, layoutPosition, projectName, consoleLogs, viewportSize, showConsole, viewportEnabled, openFile, openFiles, closeFile, updateFileContent, setActiveFile, getFileById, getFilesByType, clearAllFiles, toggleLivePreview, saveFile, refreshPreview, previewRefreshTrigger, addImage, getImage, setLayout, setProjectNameHandler, addConsoleLog, clearConsoleLogs, setViewportSizeHandler, toggleConsole, toggleViewport]
   )
 
   return <FileContext.Provider value={value}>{children}</FileContext.Provider>

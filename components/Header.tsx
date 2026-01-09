@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { LayoutIcon, EyeIcon, FileCode, Folder, FolderArchive, Info, LayoutDashboard, Eye, EyeOff, LayoutGrid } from "lucide-react"
+import { LayoutIcon, EyeIcon, FileCode, Folder, FolderArchive, Info, LayoutDashboard, Eye, EyeOff, LayoutGrid, Terminal, Monitor } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-nobile"
 import {
@@ -39,7 +39,7 @@ import { InfoModal } from "@/components/InfoModal"
 
 export function Header() {
   const isMobile = useIsMobile()
-  const { openFile: addFile, openFiles: addFiles, livePreview, toggleLivePreview, addImage, layoutOrientation, layoutPosition, setLayout } = useFiles()
+  const { openFile: addFile, openFiles: addFiles, livePreview, toggleLivePreview, addImage, layoutOrientation, layoutPosition, setLayout, showConsole, toggleConsole, viewportEnabled, toggleViewport } = useFiles()
   const [compareModalOpen, setCompareModalOpen] = React.useState(false)
   const [infoModalOpen, setInfoModalOpen] = React.useState(false)
 
@@ -123,7 +123,7 @@ export function Header() {
   return (
     <div className="flex flex-row items-center justify-between w-full p-2 sm:p-4 px-3 sm:px-6 shadow-sm border-b bg-background gap-2 relative z-50">
       {/* Left section: Logo and Navigation (hidden on mobile) */}
-      <div className="hidden md:flex gap-2 items-center flex-shrink-0">
+      <div className="hidden md:flex gap-2 items-center shrink-0">
         <div className="mr-4 lg:mr-6">
           <Image 
             src={logo} 
@@ -206,7 +206,7 @@ export function Header() {
       </div>
 
       {/* Right section: Action buttons */}
-      <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
         {/* Desktop/Tablet buttons */}
         <div className="hidden sm:flex items-center gap-1 sm:gap-2">
           <Tooltip>
@@ -228,6 +228,22 @@ export function Header() {
             </TooltipTrigger>
             <TooltipContent>
               <p>{livePreview ? "Disable live preview" : "Enable live preview"}</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant={viewportEnabled ? "default" : "ghost"}
+                size="icon"
+                className="h-8 w-8 sm:h-9 sm:w-9"
+                onClick={toggleViewport}
+                aria-label={viewportEnabled ? "Disable responsive viewport" : "Enable responsive viewport"}
+              >
+                <Monitor className="w-4 h-4" aria-hidden="true" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{viewportEnabled ? "Disable responsive viewport" : "Enable responsive viewport"}</p>
             </TooltipContent>
           </Tooltip>
           <DropdownMenu >
@@ -307,8 +323,24 @@ export function Header() {
           </Tooltip>
         </div>
 
-        {/* Mobile: Only essential buttons */}
+        {/* Mobile: Essential buttons including terminal */}
         <div className="sm:hidden flex items-center gap-1">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant={showConsole ? "default" : "ghost"}
+                size="icon"
+                className="h-8 w-8 relative"
+                onClick={toggleConsole}
+                aria-label={showConsole ? "Hide console" : "Show console"}
+              >
+                <Terminal className="w-4 h-4" aria-hidden="true" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{showConsole ? "Hide console" : "Show console"}</p>
+            </TooltipContent>
+          </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button 
@@ -328,6 +360,22 @@ export function Header() {
             </TooltipTrigger>
             <TooltipContent>
               <p>{livePreview ? "Disable live preview" : "Enable live preview"}</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant={viewportEnabled ? "default" : "ghost"}
+                size="icon"
+                className="h-8 w-8"
+                onClick={toggleViewport}
+                aria-label={viewportEnabled ? "Disable responsive viewport" : "Enable responsive viewport"}
+              >
+                <Monitor className="w-4 h-4" aria-hidden="true" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{viewportEnabled ? "Disable responsive viewport" : "Enable responsive viewport"}</p>
             </TooltipContent>
           </Tooltip>
           <ThemeToggle />

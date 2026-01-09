@@ -186,6 +186,30 @@ export function InfoModal({ open, onOpenChange }: InfoModalProps) {
                   </p>
                 </div>
               </div>
+
+              <div className="group flex items-start gap-3 p-4 rounded-xl border bg-card hover:border-primary/50 hover:shadow-md transition-all">
+                <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                  <Code className="w-5 h-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold mb-1.5">Console Panel</h4>
+                  <p className="text-sm text-muted-foreground">
+                    View all console logs, errors, warnings, and debug messages from your JavaScript code. Supports console.log, console.error, console.warn, console.info, console.debug, and console.table. Toggle the console panel from the editor toolbar.
+                  </p>
+                </div>
+              </div>
+
+              <div className="group flex items-start gap-3 p-4 rounded-xl border bg-card hover:border-primary/50 hover:shadow-md transition-all">
+                <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                  <Eye className="w-5 h-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold mb-1.5">Responsive Device Preview</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Test your design on different screen sizes. Toggle responsive mode from the header to enable device preview with presets for Mobile, Tablet, Laptop, and Desktop. Customize viewport dimensions or use preset breakpoints.
+                  </p>
+                </div>
+              </div>
             </div>
           </section>
 
@@ -209,6 +233,14 @@ export function InfoModal({ open, onOpenChange }: InfoModalProps) {
               <div className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
                 <span className="text-sm text-muted-foreground">Paste code</span>
                 <kbd className="px-3 py-1.5 text-xs font-semibold bg-background border rounded-md shadow-sm">CTRL + V</kbd>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+                <span className="text-sm text-muted-foreground">Toggle console panel</span>
+                <kbd className="px-3 py-1.5 text-xs font-semibold bg-background border rounded-md shadow-sm">Terminal button</kbd>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+                <span className="text-sm text-muted-foreground">Toggle responsive preview</span>
+                <kbd className="px-3 py-1.5 text-xs font-semibold bg-background border rounded-md shadow-sm">Monitor button</kbd>
               </div>
             </div>
           </section>
@@ -257,6 +289,18 @@ export function InfoModal({ open, onOpenChange }: InfoModalProps) {
                 <Sparkles className="w-5 h-5 text-primary mt-0.5 shrink-0" />
                 <p className="text-sm text-muted-foreground">
                   <span className="font-semibold text-foreground">Tailwind CSS and jQuery are automatically available</span> in the preview when editing HTML files. No setup required!
+                </p>
+              </div>
+              <div className="flex items-start gap-3 p-3 rounded-lg border-l-4 border-primary/50 bg-primary/5">
+                <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                <p className="text-sm text-muted-foreground">
+                  Use the <span className="font-semibold text-foreground">console panel</span> to debug your JavaScript. All console methods (log, error, warn, info, debug, table) are captured and displayed.
+                </p>
+              </div>
+              <div className="flex items-start gap-3 p-3 rounded-lg border-l-4 border-primary/50 bg-primary/5">
+                <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                <p className="text-sm text-muted-foreground">
+                  Enable <span className="font-semibold text-foreground">responsive device preview</span> to test your design on different screen sizes. Use preset breakpoints or customize dimensions.
                 </p>
               </div>
             </div>

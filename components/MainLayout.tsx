@@ -8,6 +8,8 @@ import {
 } from "@/components/ui/resizable"
 import dynamic from "next/dynamic"
 import { useFiles } from "@/contexts/FileContext"
+import { DevicePreview } from "./DevicePreview"
+import { ConsolePanel } from "./ConsolePanel"
 
 // Aggressively lazy load all heavy components to improve Speed Index and LCP
 const Preview = dynamic(() => import("./Preview").then(mod => ({ default: mod.Preview })), {
@@ -37,14 +39,30 @@ const MonacoEditor = dynamic(() => import("./MonacoEditor").then(mod => ({ defau
 })
 
 export function MainLayout() {
-  const { layoutOrientation, layoutPosition } = useFiles()
+  const { 
+    layoutOrientation, 
+    layoutPosition, 
+    viewportSize, 
+    setViewportSize, 
+    consoleLogs, 
+    clearConsoleLogs,
+    showConsole,
+    viewportEnabled,
+  } = useFiles()
 
   // Determine which panel comes first based on layout position
   const previewFirst = layoutPosition === "preview-top" || layoutPosition === "preview-left"
   
   const PreviewPanel = (
-    <ResizablePanel defaultSize={40} minSize={20}>
+    <ResizablePanel defaultSize={50} minSize={20}>
       <div className="flex flex-col h-full">
+        {viewportEnabled && (
+          <DevicePreview
+            viewportSize={viewportSize}
+            onViewportChange={setViewportSize}
+            enabled={viewportEnabled}
+          />
+        )}
         <div className="flex-1 overflow-hidden">
           <Preview />
         </div>
@@ -53,12 +71,47 @@ export function MainLayout() {
   )
 
   const EditorPanel = (
-    <ResizablePanel defaultSize={60} minSize={30}>
+    <ResizablePanel defaultSize={50} minSize={30}>
       <div className="flex flex-col h-full">
         <EditorTabs />
-        <div className="flex-1 overflow-hidden">
-          <MonacoEditor />
-        </div>
+        <ResizablePanelGroup 
+          orientation="vertical" 
+          className="flex-1"
+          key={showConsole ? "layout-with-console" : "layout-editor-only"}
+        >
+          
+          {/* Panel Editor */}
+          <ResizablePanel 
+            id="editor-pane"
+            defaultSize={showConsole ? 70 : 100} 
+            minSize={30}
+          >
+            <div className="h-full w-full">
+              <MonacoEditor />
+            </div>
+          </ResizablePanel>
+  
+          {showConsole && (
+            <>
+              <ResizableHandle withHandle />
+              
+              {/* Panel Consola */}
+              <ResizablePanel 
+                id="console-pane"
+                defaultSize={30} 
+                minSize={20}
+              >
+                <div className="h-full w-full flex flex-col border-l bg-background">
+                  <ConsolePanel
+                    logs={consoleLogs}
+                    onClear={clearConsoleLogs}
+                  />
+                </div>
+              </ResizablePanel>
+            </>
+          )}
+          
+        </ResizablePanelGroup>
       </div>
     </ResizablePanel>
   )

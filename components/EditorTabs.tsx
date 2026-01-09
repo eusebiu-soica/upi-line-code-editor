@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { X, Copy, ClipboardPaste, Trash2 } from "lucide-react"
+import { X, Copy, ClipboardPaste, Trash2, Terminal } from "lucide-react"
 import { useFiles, type EditorFile } from "@/contexts/FileContext"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -9,7 +9,7 @@ import { toast } from "sonner"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 export function EditorTabs() {
-  const { files, activeFileId, setActiveFile, closeFile, getFileById, updateFileContent } = useFiles()
+  const { files, activeFileId, setActiveFile, closeFile, getFileById, updateFileContent, showConsole, toggleConsole } = useFiles()
 
   const handleTabClick = (fileId: string) => {
     setActiveFile(fileId)
@@ -89,17 +89,17 @@ export function EditorTabs() {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              variant="ghost"
+              variant={showConsole ? "default" : "ghost"}
               size="icon"
               className="h-8 w-8"
-              onClick={handleClearEditor}
-              aria-label="Clear editor content"
+              onClick={toggleConsole}
+              aria-label={showConsole ? "Hide console" : "Show console"}
             >
-              <Trash2 className="w-4 h-4" aria-hidden="true" />
+              <Terminal className="w-4 h-4" aria-hidden="true" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Clear editor</p>
+            <p>{showConsole ? "Hide console" : "Show console"}</p>
           </TooltipContent>
         </Tooltip>
         <Tooltip>
@@ -132,6 +132,22 @@ export function EditorTabs() {
           </TooltipTrigger>
           <TooltipContent>
             <p>Paste code</p>
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={handleClearEditor}
+              aria-label="Clear editor content"
+            >
+              <Trash2 className="w-4 h-4" aria-hidden="true" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Clear editor</p>
           </TooltipContent>
         </Tooltip>
       </div>

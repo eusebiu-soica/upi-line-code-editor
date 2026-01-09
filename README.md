@@ -34,6 +34,8 @@
 - 🌓 **Theme Support** - Light, dark, and system theme modes
 - 🔍 **Code Comparison** - Built-in diff editor for comparing code snippets
 - 📱 **Fully Responsive** - Works seamlessly on desktop, tablet, and mobile
+- 🐛 **Console Panel** - Debug JavaScript with full console support (log, error, warn, info, debug, table)
+- 📐 **Device Preview** - Test responsive designs with customizable viewport sizes
 
 ---
 
@@ -52,6 +54,8 @@
 - **jQuery Support** - jQuery 3.7.1 automatically included
 - **Image Embedding** - Images converted to base64 data URLs for offline use
 - **Combined Assets** - All CSS and JS files automatically combined in preview
+- **Responsive Device Preview** - Test designs on Mobile, Tablet, Laptop, and Desktop breakpoints
+- **Custom Viewport Sizes** - Set custom width and height for precise testing
 
 ### 📂 File Management
 - **Open Files** - Individual file selection
@@ -71,11 +75,25 @@
 - **Resizable Panels** - Drag to resize editor and preview sections
 - **Theme Toggle** - Switch between light, dark, and system themes
 - **Responsive Design** - Optimized for all screen sizes
+- **Console Panel** - Integrated console for debugging JavaScript (toggle from editor toolbar)
+- **Device Preview** - Responsive viewport emulation with preset breakpoints
 
 ### ⌨️ Keyboard Shortcuts
 - `Ctrl + S` - Save file (when live preview is disabled)
 - `Ctrl + C` - Copy code
 - `Ctrl + V` - Paste code
+
+### 🐛 Console Features
+- **Full Console Support** - All standard console methods are captured:
+  - `console.log()` - General logging
+  - `console.error()` - Error messages
+  - `console.warn()` - Warning messages
+  - `console.info()` - Informational messages
+  - `console.debug()` - Debug messages
+  - `console.table()` - Tabular data display
+- **Error Capture** - Automatically captures uncaught errors and promise rejections
+- **Smart Filtering** - Filters out system errors (Chrome extensions, Vercel Analytics, etc.)
+- **Resizable Panel** - Console panel can be resized alongside the editor (50/50 default split)
 
 ---
 
@@ -167,6 +185,21 @@ npm start
 - When off, use `Ctrl + S` to manually update the preview
 - Green badge = Live preview ON
 - Red badge = Live preview OFF
+
+#### Console Panel
+- Click the terminal icon in the editor toolbar to toggle the console panel
+- Console appears on the right side of the editor (horizontal split)
+- All console output from your JavaScript is captured and displayed
+- Errors are highlighted in red with full stack traces
+- Tables are rendered in a formatted table view
+- Clear console logs with the trash icon
+
+#### Responsive Device Preview
+- Click the monitor icon in the header to toggle responsive preview mode
+- When enabled, preview shows with device-specific viewport dimensions
+- Preset breakpoints: Mobile (375x667), Tablet (768x1024), Laptop (1366x768), Desktop (1920x1080)
+- Customize width and height manually
+- Preview container includes padding to prevent overlap
 
 ---
 
