@@ -7,7 +7,17 @@ import { Input } from "@/components/ui/input"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Clipboard, Trash2, CornerLeftDown, CornerRightDown } from "lucide-react"
 import { toast } from "sonner"
-import { DiffEditor } from "@monaco-editor/react" // Import direct
+import dynamic from "next/dynamic"
+
+// Lazy load DiffEditor to improve initial page load
+const DiffEditor = dynamic(() => import("@monaco-editor/react").then((mod) => mod.DiffEditor), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-full text-muted-foreground">
+      <p>Loading diff editor...</p>
+    </div>
+  ),
+})
 import { useTheme } from "next-themes"
 
 interface CompareCodeModalProps {
@@ -94,26 +104,28 @@ export function CompareCodeModal({ open, onOpenChange }: CompareCodeModalProps) 
                   value={leftName}
                   onChange={(e) => setLeftName(e.target.value)}
                   className="h-9"
+                  aria-label="Left editor name"
                 />
-                <Button variant="outline" size="icon" onClick={handlePasteLeft} className="shrink-0">
-                  <Clipboard className="w-4 h-4" />
+                <Button variant="outline" size="icon" onClick={handlePasteLeft} className="shrink-0" aria-label="Paste code to left editor">
+                  <Clipboard className="w-4 h-4" aria-hidden="true" />
                 </Button>
               </div>
 
               {/* Center Clear */}
-              <Button variant="destructive" size="icon" onClick={handleClear} className="shrink-0">
-                <Trash2 className="w-4 h-4" />
+              <Button variant="destructive" size="icon" onClick={handleClear} className="shrink-0" aria-label="Clear both editors">
+                <Trash2 className="w-4 h-4" aria-hidden="true" />
               </Button>
 
               {/* Right Controls */}
               <div className="flex-1 flex items-center gap-2 w-full">
-                <Button variant="outline" size="icon" onClick={handlePasteRight} className="shrink-0">
-                  <Clipboard className="w-4 h-4" />
+                <Button variant="outline" size="icon" onClick={handlePasteRight} className="shrink-0" aria-label="Paste code to right editor">
+                  <Clipboard className="w-4 h-4" aria-hidden="true" />
                 </Button>
                 <Input
                   value={rightName}
                   onChange={(e) => setRightName(e.target.value)}
                   className="h-9"
+                  aria-label="Right editor name"
                 />
                 <CornerRightDown className="w-5 h-5 text-muted-foreground shrink-0 mt-2.5" />
               </div>
@@ -121,7 +133,7 @@ export function CompareCodeModal({ open, onOpenChange }: CompareCodeModalProps) 
           </div>
         </DialogHeader>
         
-        <div className="flex-1 min-h-0 w-full bg-background p-0">
+        <div className="flex-1 min-h-0 w-full bg-background p-0" role="region" aria-label="Code comparison editor">
           <div className="h-full w-full border rounded-none overflow-hidden">
             {isMounted ? (
               <DiffEditor
@@ -146,7 +158,7 @@ export function CompareCodeModal({ open, onOpenChange }: CompareCodeModalProps) 
                 } as any}
               />
             ) : (
-              <div className="flex items-center justify-center h-full">
+              <div className="flex items-center justify-center h-full" role="status" aria-live="polite">
                 <div className="p-4 text-center text-muted-foreground">Loading editor...</div>
               </div>
             )}

@@ -125,7 +125,15 @@ export function Header() {
       {/* Left section: Logo and Navigation (hidden on mobile) */}
       <div className="hidden md:flex gap-2 items-center flex-shrink-0">
         <div className="mr-4 lg:mr-6">
-          <Image src={logo} alt="Upi-Line Logo" width={35} height={35} className="w-8 h-9! lg:w-[35px] lg:h-[35px]" />
+          <Image 
+            src={logo} 
+            alt="Upi-Line Code Editor Logo" 
+            width={35} 
+            height={35} 
+            className="w-8 h-9! lg:w-[35px] lg:h-[35px]"
+            priority
+            loading="eager"
+          />
         </div>
         <NavigationMenu viewport={isMobile}>
           <NavigationMenuList className="flex-wrap">
@@ -151,6 +159,7 @@ export function Header() {
           variant="ghost" 
           className="hidden md:flex"
           onClick={() => setCompareModalOpen(true)}
+          aria-label="Compare code using diff editor"
         >
           Compare the code
         </Button>
@@ -158,7 +167,15 @@ export function Header() {
 
       {/* Mobile menu button (only on mobile/tablet under 1024px) */}
       <div className="md:hidden flex items-center gap-2">
-        <Image src={logo} alt="Upi-Line Logo" width={28} height={28} className="w-7 h-7" />
+        <Image 
+          src={logo} 
+          alt="Upi-Line Code Editor Logo" 
+          width={28} 
+          height={28} 
+          className="w-7 h-7"
+          priority
+          loading="eager"
+        />
         <NavigationMenu>
           <NavigationMenuList>
             <NavigationMenuItem>
@@ -199,11 +216,13 @@ export function Header() {
                 size="icon"
                 className="h-8 w-8 sm:h-9 sm:w-9 relative"
                 onClick={handleToggleLivePreview}
+                aria-label={livePreview ? "Disable live preview" : "Enable live preview"}
               >
-                {livePreview ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                {livePreview ? <Eye className="w-4 h-4" aria-hidden="true" /> : <EyeOff className="w-4 h-4" aria-hidden="true" />}
                 <Badge 
                   className={`absolute top-0 right-0 h-2 w-2 p-0 border-0 ${livePreview ? 'bg-green-500' : 'bg-red-500'}`}
                   variant="default"
+                  aria-hidden="true"
                 />
               </Button>
             </TooltipTrigger>
@@ -215,8 +234,8 @@ export function Header() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9">
-                    <LayoutGrid strokeWidth={2} className="w-4 h-4" />
+                  <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9" aria-label="Change layout">
+                    <LayoutGrid strokeWidth={2} className="w-4 h-4" aria-hidden="true" />
                   </Button>
                 </DropdownMenuTrigger>
               </TooltipTrigger>
@@ -277,8 +296,9 @@ export function Header() {
                 size="icon" 
                 className="h-8 w-8 sm:h-9 sm:w-9"
                 onClick={() => setInfoModalOpen(true)}
+                aria-label="Show information about the application"
               >
-                <Info className="w-4 h-4" />
+                <Info className="w-4 h-4" aria-hidden="true" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
@@ -296,11 +316,13 @@ export function Header() {
                 size="icon"
                 className="h-8 w-8 relative"
                 onClick={handleToggleLivePreview}
+                aria-label={livePreview ? "Disable live preview" : "Enable live preview"}
               >
-                {livePreview ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                {livePreview ? <Eye className="w-4 h-4" aria-hidden="true" /> : <EyeOff className="w-4 h-4" aria-hidden="true" />}
                 <Badge 
                   className={`absolute -top-1 -right-1 h-2 w-2 p-0 border-0 ${livePreview ? 'bg-green-500' : 'bg-red-500'}`}
                   variant="default"
+                  aria-hidden="true"
                 />
               </Button>
             </TooltipTrigger>
@@ -335,10 +357,11 @@ function ListItem({
   return (
     <li {...props}>
       <NavigationMenuLink asChild className="p-3">
-        <button
-          onClick={onClick}
-          className="flex flex-row gap-4 items-start select-none rounded-md leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground w-full text-left"
-        >
+      <button
+        onClick={onClick}
+        className="flex flex-row gap-4 items-start select-none rounded-md leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground w-full text-left"
+        aria-label={title}
+      >
           {icon}
           <div className="flex flex-col gap-1.5">
             <div className="text-sm font-medium leading-none">{title}</div>

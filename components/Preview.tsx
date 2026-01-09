@@ -7,22 +7,35 @@ export function Preview() {
   const { files, activeFileId, livePreview, previewRefreshTrigger, getFileById, images, getImage } = useFiles()
   const iframeRef = React.useRef<HTMLIFrameElement>(null)
 
-  // Get HTML, CSS, and JS content
-  // Use active HTML file if it exists and is HTML type, otherwise use first HTML file
-  const activeFile = activeFileId ? getFileById(activeFileId) : null
-  const htmlFile = activeFile?.type === "html" 
-    ? activeFile 
-    : files.find((f) => f.type === "html")
+  // Get HTML, CSS, and JS content (memoized to avoid unnecessary recalculations)
+  const htmlFile = React.useMemo(() => {
+    const activeFile = activeFileId ? getFileById(activeFileId) : null
+    return activeFile?.type === "html" 
+      ? activeFile 
+      : files.find((f) => f.type === "html")
+  }, [activeFileId, getFileById, files])
   
-  // Get ALL CSS and JS files (they will be combined)
-  const cssFiles = files.filter((f) => f.type === "css")
-  const jsFiles = files.filter((f) => f.type === "js")
+  // Get ALL CSS and JS files (memoized to avoid unnecessary recalculations)
+  const cssFiles = React.useMemo(() => 
+    files.filter((f) => f.type === "css"),
+    [files]
+  )
+  const jsFiles = React.useMemo(() => 
+    files.filter((f) => f.type === "js"),
+    [files]
+  )
 
-  // Combine all CSS files
-  const combinedCSS = cssFiles.map((f) => f.content).join("\n\n")
+  // Combine all CSS files (memoized to avoid unnecessary recalculations)
+  const combinedCSS = React.useMemo(() => 
+    cssFiles.map((f) => f.content).join("\n\n"),
+    [cssFiles]
+  )
 
-  // Combine all JS files
-  const combinedJS = jsFiles.map((f) => f.content).join("\n\n")
+  // Combine all JS files (memoized to avoid unnecessary recalculations)
+  const combinedJS = React.useMemo(() => 
+    jsFiles.map((f) => f.content).join("\n\n"),
+    [jsFiles]
+  )
 
   // Create the preview HTML with XSS protection
   const previewHTML = React.useMemo(() => {
@@ -64,11 +77,11 @@ export function Preview() {
     html = html.replace(/<script[^>]*id="tailwind-cdn"[^>]*>[\s\S]*?<\/script>/gi, "")
     html = html.replace(/<script[^>]*id="jquery-cdn"[^>]*>[\s\S]*?<\/script>/gi, "")
 
-    // Add Tailwind CSS CDN (using Tailwind Play CDN which works without compilation)
-    const tailwindCDN = '<script id="tailwind-cdn" src="https://cdn.tailwindcss.com"></script>'
+    // Add Tailwind CSS CDN (defer loading to improve performance)
+    const tailwindCDN = '<script id="tailwind-cdn" src="https://cdn.tailwindcss.com" defer></script>'
     
-    // Add jQuery CDN
-    const jqueryCDN = '<script id="jquery-cdn" src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>'
+    // Add jQuery CDN (defer loading to improve performance)
+    const jqueryCDN = '<script id="jquery-cdn" src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous" defer></script>'
 
     // Always inject ALL CSS files (combine them all)
     if (combinedCSS) {
@@ -146,14 +159,19 @@ export function Preview() {
     }
 
     return html
-  }, [htmlFile?.content, htmlFile?.id, combinedCSS, combinedJS, cssFiles.length, jsFiles.length, images, getImage])
+  }, [htmlFile?.content, htmlFile?.id, combinedCSS, combinedJS, images, getImage, previewRefreshTrigger])
 
-  // Function to update iframe content
+  // Function to update iframe content (optimized to reduce blocking)
   const updateIframe = React.useCallback(() => {
     if (iframeRef.current && iframeRef.current.contentDocument) {
-      iframeRef.current.contentDocument.open()
-      iframeRef.current.contentDocument.write(previewHTML)
-      iframeRef.current.contentDocument.close()
+      // Use requestAnimationFrame to avoid blocking main thread
+      requestAnimationFrame(() => {
+        if (iframeRef.current?.contentDocument) {
+          iframeRef.current.contentDocument.open()
+          iframeRef.current.contentDocument.write(previewHTML)
+          iframeRef.current.contentDocument.close()
+        }
+      })
     }
   }, [previewHTML])
 
@@ -162,12 +180,24 @@ export function Preview() {
   const lastTriggerRef = React.useRef<number>(0)
   const isInitialMountRef = React.useRef(true)
 
-  // Initial load - update iframe once when component mounts
+  // Initial load - defer iframe update to improve initial render
   React.useEffect(() => {
-    if (isInitialMountRef.current && iframeRef.current && iframeRef.current.contentDocument) {
-      updateIframe()
-      lastPreviewHTMLRef.current = previewHTML
-      isInitialMountRef.current = false
+    if (isInitialMountRef.current && iframeRef.current) {
+      // Defer initial iframe load to not block initial paint
+      const loadIframe = () => {
+        if (iframeRef.current?.contentDocument) {
+          updateIframe()
+          lastPreviewHTMLRef.current = previewHTML
+          isInitialMountRef.current = false
+        }
+      }
+      
+      // Use requestIdleCallback if available, otherwise defer with setTimeout
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadIframe, { timeout: 500 })
+      } else {
+        setTimeout(loadIframe, 100)
+      }
     }
   }, [previewHTML, updateIframe])
 
@@ -182,11 +212,19 @@ export function Preview() {
         clearTimeout(debounceTimerRef.current)
       }
 
-      // Debounce the update (500ms delay)
-      debounceTimerRef.current = setTimeout(() => {
+      // Debounce the update (500ms delay) - use requestIdleCallback for better performance
+      const update = () => {
         updateIframe()
         lastPreviewHTMLRef.current = previewHTML
-      }, 500)
+      }
+
+      if ('requestIdleCallback' in window) {
+        debounceTimerRef.current = setTimeout(() => {
+          requestIdleCallback(update, { timeout: 500 })
+        }, 500)
+      } else {
+        debounceTimerRef.current = setTimeout(update, 500)
+      }
     }
 
     return () => {
@@ -206,13 +244,17 @@ export function Preview() {
   }, [previewRefreshTrigger, livePreview, updateIframe, previewHTML])
 
   return (
-    <div className="h-full w-full bg-background">
+    <div className="h-full w-full bg-background" role="region" aria-label="Live preview of your code">
       <iframe
         ref={iframeRef}
         className="w-full h-full border-0 bg-white"
-        title="Preview"
+        title="Live preview of your code"
         sandbox="allow-scripts allow-same-origin"
         style={{ backgroundColor: 'white' }}
+        loading="lazy"
+        aria-label="Live preview iframe"
+        // Performance: Reduce iframe rendering cost
+        referrerPolicy="no-referrer"
       />
     </div>
   )

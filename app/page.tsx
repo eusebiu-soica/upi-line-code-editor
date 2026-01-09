@@ -3,8 +3,10 @@ import { DragDropZone } from "@/components/DragDropZone";
 
 export default function Page() {
     return (
-        <DragDropZone>
-            <MainLayout />
-        </DragDropZone>
+        <main id="main-content" tabIndex={-1}>
+            <DragDropZone>
+                <MainLayout />
+            </DragDropZone>
+        </main>
     );
 }

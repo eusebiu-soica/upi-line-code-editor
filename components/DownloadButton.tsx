@@ -137,11 +137,11 @@ export function Download() {
             {/* Desktop/Tablet version */}
             <div className="hidden sm:block">
                 <ButtonGroup>
-                    <Button variant="default" className="font-normal" onClick={handleDownloadZIP}>Download code</Button>
+                    <Button variant="default" className="font-normal" onClick={handleDownloadZIP} aria-label="Download all project files as ZIP archive">Download code</Button>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="default" className="!pl-2">
-                                <ChevronDownIcon />
+                            <Button variant="default" className="!pl-2" aria-label="More download options">
+                                <ChevronDownIcon aria-hidden="true" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-[300px]">
@@ -167,8 +167,8 @@ export function Download() {
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="default" size="icon" className="h-8 w-8">
-                                    <DownloadIcon className="w-4 h-4" />
+                                <Button variant="default" size="icon" className="h-8 w-8" aria-label="Download code">
+                                    <DownloadIcon className="w-4 h-4" aria-hidden="true" />
                                 </Button>
                             </DropdownMenuTrigger>
                         </TooltipTrigger>
@@ -213,6 +213,7 @@ function ListItem({
         <DropdownMenuItem key={title}
             className="flex gap-4 items-start justify-start p-3"
             onClick={onClick}
+            aria-label={title}
         >
             {icon}
             <div className="flex flex-col items-start gap-1.5">

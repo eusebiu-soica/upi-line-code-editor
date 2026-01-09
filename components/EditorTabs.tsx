@@ -72,7 +72,7 @@ export function EditorTabs() {
   }
 
   return (
-    <div className="flex items-center justify-between gap-1 border-b bg-muted/30">
+    <div className="flex items-center justify-between gap-1 border-b bg-muted/30" role="tablist" aria-label="File tabs">
       <div className="flex items-center gap-1 overflow-x-auto flex-1">
         {files.map((file) => (
           <TabButton
@@ -93,8 +93,9 @@ export function EditorTabs() {
               size="icon"
               className="h-8 w-8"
               onClick={handleClearEditor}
+              aria-label="Clear editor content"
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-4 h-4" aria-hidden="true" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -108,8 +109,9 @@ export function EditorTabs() {
               size="icon"
               className="h-8 w-8"
               onClick={handleCopyCode}
+              aria-label="Copy code to clipboard"
             >
-              <Copy className="w-4 h-4" />
+              <Copy className="w-4 h-4" aria-hidden="true" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -123,8 +125,9 @@ export function EditorTabs() {
               size="icon"
               className="h-8 w-8"
               onClick={handlePasteCode}
+              aria-label="Paste code from clipboard"
             >
-              <ClipboardPaste className="w-4 h-4" />
+              <ClipboardPaste className="w-4 h-4" aria-hidden="true" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -150,24 +153,31 @@ function TabButton({
   onClose: (e: React.MouseEvent) => void
 }) {
   return (
-    <button
-      onClick={onClick}
+    <div
       className={cn(
-        "flex items-center gap-2 px-4 py-2 text-sm border-b-2 transition-colors",
+        "flex items-center gap-2 px-4 py-2 text-sm border-b-2 transition-colors relative group",
         "hover:bg-muted/50",
         isActive
           ? "border-primary bg-background text-foreground"
           : "border-transparent text-muted-foreground"
       )}
     >
-      <span className="truncate max-w-[150px]">{file.name}</span>
-      {file.isDirty && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
+      <button
+        onClick={onClick}
+        className="flex items-center gap-2 flex-1 text-left"
+        aria-label={`${file.name} tab${isActive ? ", currently active" : ""}`}
+        aria-selected={isActive}
+        role="tab"
+      >
+        <span className="truncate max-w-[150px]">{file.name}</span>
+        {file.isDirty && <span className="w-1.5 h-1.5 rounded-full bg-primary" aria-hidden="true" />}
+      </button>
       {canClose && (
-        <div
+        <button
           onClick={onClose}
-          className="ml-1 p-0.5 rounded hover:bg-muted opacity-70 hover:opacity-100 cursor-pointer"
+          className="ml-1 p-0.5 rounded hover:bg-muted opacity-70 hover:opacity-100 cursor-pointer shrink-0"
           onMouseDown={(e) => e.stopPropagation()}
-          role="button"
+          aria-label={`Close ${file.name} tab`}
           tabIndex={0}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
@@ -176,10 +186,10 @@ function TabButton({
             }
           }}
         >
-          <X className="w-3 h-3" />
-        </div>
+          <X className="w-3 h-3" aria-hidden="true" />
+        </button>
       )}
-    </button>
+    </div>
   )
 }
 

@@ -5,24 +5,40 @@ import { Header } from "@/components/Header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { FileProvider } from "@/contexts/FileContext";
 import { Toaster } from "sonner";
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/next";
 
-const outfit = Outfit({ subsets: ['latin'], variable: '--font-sans' });
+const outfit = Outfit({ 
+  subsets: ['latin'], 
+  variable: '--font-sans',
+  display: 'swap',
+  preload: true,
+  adjustFontFallback: true,
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: 'swap',
+  preload: true,
+  adjustFontFallback: true,
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: 'swap',
+  preload: true,
+  adjustFontFallback: true,
 });
 
 export const metadata: Metadata = {
   title: "Upi Line | Code Editor",
   description: "A powerful code editor with live preview for HTML, CSS, and JavaScript",
   manifest: "/manifest.json",
+  // Performance optimizations
+  other: {
+    "dns-prefetch": "https://cdn.tailwindcss.com https://code.jquery.com",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -69,6 +85,35 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
+        {/* Resource hints for external CDNs - added via script for Next.js app directory */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                const hints = [
+                  { rel: 'dns-prefetch', href: 'https://cdn.tailwindcss.com' },
+                  { rel: 'dns-prefetch', href: 'https://code.jquery.com' },
+                  { rel: 'preconnect', href: 'https://cdn.tailwindcss.com', crossorigin: 'anonymous' },
+                  { rel: 'preconnect', href: 'https://code.jquery.com', crossorigin: 'anonymous' }
+                ];
+                hints.forEach(hint => {
+                  const link = document.createElement('link');
+                  link.rel = hint.rel;
+                  link.href = hint.href;
+                  if (hint.crossorigin) link.crossOrigin = hint.crossorigin;
+                  document.head.appendChild(link);
+                });
+              })();
+            `,
+          }}
+        />
+        {/* Skip to main content link for accessibility */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-100 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:shadow-lg"
+        >
+          Skip to main content
+        </a>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -82,19 +127,29 @@ export default function RootLayout({
             <Analytics />
           </FileProvider>
         </ThemeProvider>
+        {/* Defer service worker registration to not block initial load */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                  navigator.serviceWorker.register('/sw.js')
-                    .then((registration) => {
-                      console.log('SW registered: ', registration);
-                    })
-                    .catch((registrationError) => {
-                      console.log('SW registration failed: ', registrationError);
-                    });
-                });
+                // Defer service worker registration until after page load and idle
+                const registerSW = () => {
+                  requestIdleCallback(() => {
+                    navigator.serviceWorker.register('/sw.js')
+                      .then((registration) => {
+                        console.log('SW registered: ', registration);
+                      })
+                      .catch((registrationError) => {
+                        console.log('SW registration failed: ', registrationError);
+                      });
+                  }, { timeout: 2000 });
+                };
+                
+                if (document.readyState === 'complete') {
+                  registerSW();
+                } else {
+                  window.addEventListener('load', registerSW, { once: true });
+                }
               }
             `,
           }}

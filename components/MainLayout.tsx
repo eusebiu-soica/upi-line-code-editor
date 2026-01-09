@@ -1,14 +1,40 @@
 "use client"
 
+import * as React from "react"
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable"
-import { Preview } from "./Preview"
-import { EditorTabs } from "./EditorTabs"
-import { MonacoEditor } from "./MonacoEditor"
+import dynamic from "next/dynamic"
 import { useFiles } from "@/contexts/FileContext"
+
+// Aggressively lazy load all heavy components to improve Speed Index and LCP
+const Preview = dynamic(() => import("./Preview").then(mod => ({ default: mod.Preview })), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-full text-muted-foreground bg-background">
+      <div className="text-sm">Loading preview...</div>
+    </div>
+  ),
+})
+
+const EditorTabs = dynamic(() => import("./EditorTabs").then(mod => ({ default: mod.EditorTabs })), {
+  ssr: false,
+  loading: () => (
+    <div className="h-10 border-b bg-muted/30 animate-pulse" />
+  ),
+})
+
+// Lazy load MonacoEditor to prevent blocking initial render
+const MonacoEditor = dynamic(() => import("./MonacoEditor").then(mod => ({ default: mod.MonacoEditor })), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-full text-muted-foreground bg-background">
+      <div className="text-sm">Loading editor...</div>
+    </div>
+  ),
+})
 
 export function MainLayout() {
   const { layoutOrientation, layoutPosition } = useFiles()
