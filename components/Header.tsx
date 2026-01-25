@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { LayoutIcon, EyeIcon, FileCode, Folder, FolderArchive, Info, LayoutDashboard, Eye, EyeOff, LayoutGrid, Terminal, Monitor } from "lucide-react"
+import { LayoutIcon, EyeIcon, FileCode, Folder, FolderArchive, LayoutDashboard, Eye, EyeOff, LayoutGrid, Terminal, Monitor, Settings as SettingsIcon } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-nobile"
 import {
@@ -35,13 +35,13 @@ import {
 import { LayoutOrientation, LayoutPosition } from "@/contexts/FileContext"
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Split } from "lucide-react"
 import { CompareCodeModal } from "@/components/CompareCodeModal"
-import { InfoModal } from "@/components/InfoModal"
+import { Settings } from "@/components/Settings"
 
 export function Header() {
   const isMobile = useIsMobile()
   const { openFile: addFile, openFiles: addFiles, livePreview, toggleLivePreview, addImage, layoutOrientation, layoutPosition, setLayout, showConsole, toggleConsole, viewportEnabled, toggleViewport } = useFiles()
   const [compareModalOpen, setCompareModalOpen] = React.useState(false)
-  const [infoModalOpen, setInfoModalOpen] = React.useState(false)
+  const [settingsOpen, setSettingsOpen] = React.useState(false)
 
   const handleToggleLivePreview = () => {
     toggleLivePreview()
@@ -311,14 +311,14 @@ export function Header() {
                 variant="ghost" 
                 size="icon" 
                 className="h-8 w-8 sm:h-9 sm:w-9"
-                onClick={() => setInfoModalOpen(true)}
-                aria-label="Show information about the application"
+                onClick={() => setSettingsOpen(true)}
+                aria-label="Open settings"
               >
-                <Info className="w-4 h-4" aria-hidden="true" />
+                <SettingsIcon className="w-4 h-4" aria-hidden="true" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Information</p>
+              <p>Settings</p>
             </TooltipContent>
           </Tooltip>
         </div>
@@ -389,7 +389,7 @@ export function Header() {
 
       {/* Modals */}
       <CompareCodeModal open={compareModalOpen} onOpenChange={setCompareModalOpen} />
-      <InfoModal open={infoModalOpen} onOpenChange={setInfoModalOpen} />
+      <Settings open={settingsOpen} onOpenChange={setSettingsOpen} />
     </div>
   )
 }

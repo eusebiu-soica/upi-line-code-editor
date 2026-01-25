@@ -3,6 +3,7 @@
 import * as React from "react"
 import dynamic from "next/dynamic"
 import { useFiles } from "@/contexts/FileContext"
+import { useSettings } from "@/contexts/SettingsContext"
 import type { editor } from "monaco-editor"
 import { useHotkeys } from "react-hotkeys-hook"
 import { toast } from "sonner"
@@ -23,6 +24,7 @@ const Editor = dynamic(() => import("@monaco-editor/react"), {
 
 export function MonacoEditor() {
   const { files, activeFileId, updateFileContent, livePreview, saveFile } = useFiles()
+  const { settings } = useSettings()
   const { theme: appTheme, resolvedTheme } = useTheme()
   const activeFile = files.find((f) => f.id === activeFileId)
   const editorRef = React.useRef<editor.IStandaloneCodeEditor | null>(null)
@@ -104,7 +106,7 @@ export function MonacoEditor() {
     }
   }, [shouldLoadEditor])
 
-  // Map app theme to Monaco theme
+  // Map app theme to Monaco theme (automatically follows site theme)
   const monacoTheme = React.useMemo(() => {
     if (typeof window === "undefined") return "vs"
     const theme = resolvedTheme || appTheme || "system"
@@ -300,13 +302,13 @@ export function MonacoEditor() {
         onMount={handleEditorDidMount}
         theme={monacoTheme}
         options={{
-          minimap: { enabled: false },
-          fontSize: 14,
+          minimap: { enabled: settings.editorMinimap },
+          fontSize: settings.editorFontSize,
           lineNumbers: "on",
           scrollBeyondLastLine: false,
           automaticLayout: true,
-          tabSize: 2,
-          wordWrap: "on",
+          tabSize: settings.editorTabSize,
+          wordWrap: settings.editorWordWrap ? "on" : "off",
         }}
       />
     </div>

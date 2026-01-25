@@ -4,6 +4,9 @@ import "./globals.css";
 import { Header } from "@/components/Header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { FileProvider } from "@/contexts/FileContext";
+import { SettingsProvider } from "@/contexts/SettingsContext";
+import { SettingsApplier } from "@/components/SettingsApplier";
+import { ColorSchemeApplier } from "@/components/ColorSchemeApplier";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next";
 
@@ -120,12 +123,16 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <FileProvider>
-            <Header />
-            {children}
-            <Toaster position="bottom-right" />
-            <Analytics />
-          </FileProvider>
+          <SettingsProvider>
+            <FileProvider>
+              <SettingsApplier />
+              <ColorSchemeApplier />
+              <Header />
+              {children}
+              <Toaster position="bottom-right" />
+              <Analytics />
+            </FileProvider>
+          </SettingsProvider>
         </ThemeProvider>
         {/* Defer service worker registration to not block initial load */}
         <script

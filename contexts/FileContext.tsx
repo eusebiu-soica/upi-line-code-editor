@@ -67,8 +67,48 @@ interface FileContextType {
 
 const FileContext = React.createContext<FileContextType | undefined>(undefined)
 
+const FILES_STORAGE_KEY = "upi-line-editor-files"
+
 export function FileProvider({ children }: { children: React.ReactNode }) {
+  // Load files from localStorage if auto-save is enabled (check directly, not via settings context)
+  const loadFilesFromStorage = React.useCallback((): EditorFile[] | null => {
+    if (typeof window === "undefined") {
+      return null
+    }
+    
+    try {
+      // Check if auto-save is enabled in localStorage
+      const settingsStored = localStorage.getItem("upi-line-editor-settings")
+      if (settingsStored) {
+        const settings = JSON.parse(settingsStored)
+        if (!settings.autoSaveToLocalStorage) {
+          return null
+        }
+      } else {
+        return null
+      }
+      
+      const stored = localStorage.getItem(FILES_STORAGE_KEY)
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load files from localStorage:", error)
+    }
+    
+    return null
+  }, [])
+
   const [files, setFiles] = React.useState<EditorFile[]>(() => {
+    const storedFiles = loadFilesFromStorage()
+    if (storedFiles) {
+      return storedFiles
+    }
+    
+    // Initialize with default HTML, CSS, JS tabs
     // Initialize with default HTML, CSS, JS tabs
     return [
       {
@@ -105,7 +145,13 @@ export function FileProvider({ children }: { children: React.ReactNode }) {
       },
     ]
   })
-  const [activeFileId, setActiveFileId] = React.useState<string | null>("default-html")
+  const [activeFileId, setActiveFileId] = React.useState<string | null>(() => {
+    const storedFiles = loadFilesFromStorage()
+    if (storedFiles && storedFiles.length > 0) {
+      return storedFiles[0].id
+    }
+    return "default-html"
+  })
   const [livePreview, setLivePreview] = React.useState<boolean>(true)
   const [previewRefreshTrigger, setPreviewRefreshTrigger] = React.useState(0)
   const [images, setImages] = React.useState<Map<string, string>>(new Map())
@@ -120,6 +166,23 @@ export function FileProvider({ children }: { children: React.ReactNode }) {
   })
   const [showConsole, setShowConsole] = React.useState<boolean>(false)
   const [viewportEnabled, setViewportEnabled] = React.useState<boolean>(false)
+
+  // Save files to localStorage when auto-save is enabled
+  React.useEffect(() => {
+    if (typeof window === "undefined") return
+    
+    try {
+      const settingsStored = localStorage.getItem("upi-line-editor-settings")
+      if (settingsStored) {
+        const settings = JSON.parse(settingsStored)
+        if (settings.autoSaveToLocalStorage) {
+          localStorage.setItem(FILES_STORAGE_KEY, JSON.stringify(files))
+        }
+      }
+    } catch (error) {
+      console.error("Failed to save files to localStorage:", error)
+    }
+  }, [files])
 
   const openFile = React.useCallback((file: EditorFile) => {
     setFiles((prev) => {

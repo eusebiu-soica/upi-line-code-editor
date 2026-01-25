@@ -2,10 +2,12 @@
 
 import * as React from "react"
 import { useFiles, type ConsoleLog } from "@/contexts/FileContext"
+import { useSettings } from "@/contexts/SettingsContext"
 import { cn } from "@/lib/utils"
 
 export function Preview() {
   const { files, activeFileId, livePreview, previewRefreshTrigger, getFileById, images, getImage, viewportSize, viewportEnabled, addConsoleLog, setViewportSize } = useFiles()
+  const { settings } = useSettings()
   const iframeRef = React.useRef<HTMLIFrameElement>(null)
   const logIdCounterRef = React.useRef(0)
   const previewContainerRef = React.useRef<HTMLDivElement>(null)
@@ -81,6 +83,9 @@ export function Preview() {
     html = html.replace(/<script[^>]*id="tailwind-cdn"[^>]*>[\s\S]*?<\/script>/gi, "")
     html = html.replace(/<script[^>]*id="jquery-cdn"[^>]*>[\s\S]*?<\/script>/gi, "")
     html = html.replace(/<script[^>]*id="console-capture"[^>]*>[\s\S]*?<\/script>/gi, "")
+    // Remove custom CDN scripts
+    html = html.replace(/<script[^>]*id="custom-cdn-[\d]+"[^>]*>[\s\S]*?<\/script>/gi, "")
+    html = html.replace(/<link[^>]*id="custom-cdn-[\d]+"[^>]*>/gi, "")
 
     // Console capture script - intercepts all console methods
     // Must be injected FIRST in <head> to catch all errors before user scripts run
@@ -264,6 +269,19 @@ export function Preview() {
     
     // Add jQuery CDN (defer loading to improve performance)
     const jqueryCDN = '<script id="jquery-cdn" src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous" defer></script>'
+    
+    // Add custom CDNs from settings
+    const customCDNs = settings.customCDNs.map((cdn, index) => {
+      // Determine if it's a script or link tag based on file extension or URL pattern
+      const isScript = cdn.match(/\.(js|mjs)$/i) || cdn.includes('script')
+      const isStyle = cdn.match(/\.(css)$/i) || cdn.includes('stylesheet')
+      
+      if (isStyle) {
+        return `<link id="custom-cdn-${index}" rel="stylesheet" href="${cdn}">`
+      } else {
+        return `<script id="custom-cdn-${index}" src="${cdn}" defer></script>`
+      }
+    }).join('\n    ')
 
     // Always inject ALL CSS files (combine them all)
     if (combinedCSS) {
@@ -291,20 +309,20 @@ export function Preview() {
           // Find position right after <head> tag
           const headPos = html.indexOf(headMatch[0]) + headMatch[0].length;
           html = html.slice(0, headPos) + consoleCaptureScript + '\n    ' + html.slice(headPos);
-          // Then add CSS and Tailwind before </head>
-          html = html.replace("</head>", `${tailwindCDN}\n    <style id="combined-css">${processedCSS}</style></head>`)
+          // Then add CSS, Tailwind, and custom CDNs before </head>
+          html = html.replace("</head>", `${tailwindCDN}\n    ${customCDNs ? customCDNs + '\n    ' : ''}<style id="combined-css">${processedCSS}</style></head>`)
         } else {
-          html = html.replace("</head>", `${consoleCaptureScript}\n    ${tailwindCDN}\n    <style id="combined-css">${processedCSS}</style></head>`)
+          html = html.replace("</head>", `${consoleCaptureScript}\n    ${tailwindCDN}\n    ${customCDNs ? customCDNs + '\n    ' : ''}<style id="combined-css">${processedCSS}</style></head>`)
         }
       } else if (html.includes("<head>")) {
         // Insert console capture script immediately after <head> tag
-        html = html.replace("<head>", `<head>${consoleCaptureScript}\n    ${tailwindCDN}\n    <style id="combined-css">${processedCSS}</style>`)
+        html = html.replace("<head>", `<head>${consoleCaptureScript}\n    ${tailwindCDN}\n    ${customCDNs ? customCDNs + '\n    ' : ''}<style id="combined-css">${processedCSS}</style>`)
       } else {
         // No head tag, add it
         if (html.includes("<html>")) {
-          html = html.replace("<html>", `<html><head>${consoleCaptureScript}\n    ${tailwindCDN}\n    <style id="combined-css">${processedCSS}</style></head>`)
+          html = html.replace("<html>", `<html><head>${consoleCaptureScript}\n    ${tailwindCDN}\n    ${customCDNs ? customCDNs + '\n    ' : ''}<style id="combined-css">${processedCSS}</style></head>`)
         } else {
-          html = `<html><head>${consoleCaptureScript}\n    ${tailwindCDN}\n    <style id="combined-css">${processedCSS}</style></head><body>${html}</body></html>`
+          html = `<html><head>${consoleCaptureScript}\n    ${tailwindCDN}\n    ${customCDNs ? customCDNs + '\n    ' : ''}<style id="combined-css">${processedCSS}</style></head><body>${html}</body></html>`
         }
       }
     } else {
@@ -317,19 +335,19 @@ export function Preview() {
           // Find position right after <head> tag
           const headPos = html.indexOf(headMatch[0]) + headMatch[0].length;
           html = html.slice(0, headPos) + consoleCaptureScript + '\n    ' + html.slice(headPos);
-          // Then add Tailwind before </head>
-          html = html.replace("</head>", `${tailwindCDN}\n</head>`)
+          // Then add Tailwind and custom CDNs before </head>
+          html = html.replace("</head>", `${tailwindCDN}\n    ${customCDNs ? customCDNs + '\n    ' : ''}</head>`)
         } else {
-          html = html.replace("</head>", `${consoleCaptureScript}\n    ${tailwindCDN}\n</head>`)
+          html = html.replace("</head>", `${consoleCaptureScript}\n    ${tailwindCDN}\n    ${customCDNs ? customCDNs + '\n    ' : ''}</head>`)
         }
       } else if (html.includes("<head>")) {
         // Insert console capture script immediately after <head> tag
-        html = html.replace("<head>", `<head>${consoleCaptureScript}\n    ${tailwindCDN}`)
+        html = html.replace("<head>", `<head>${consoleCaptureScript}\n    ${tailwindCDN}\n    ${customCDNs ? customCDNs : ''}`)
       } else {
         if (html.includes("<html>")) {
-          html = html.replace("<html>", `<html><head>${consoleCaptureScript}\n    ${tailwindCDN}\n</head>`)
+          html = html.replace("<html>", `<html><head>${consoleCaptureScript}\n    ${tailwindCDN}\n    ${customCDNs ? customCDNs + '\n    ' : ''}</head>`)
         } else {
-          html = `<html><head>${consoleCaptureScript}\n    ${tailwindCDN}\n</head><body>${html}</body></html>`
+          html = `<html><head>${consoleCaptureScript}\n    ${tailwindCDN}\n    ${customCDNs ? customCDNs + '\n    ' : ''}</head><body>${html}</body></html>`
         }
       }
     }
@@ -366,7 +384,7 @@ export function Preview() {
     }
 
     return html
-  }, [htmlFile?.content, htmlFile?.id, combinedCSS, combinedJS, images, getImage, previewRefreshTrigger])
+  }, [htmlFile?.content, htmlFile?.id, combinedCSS, combinedJS, images, getImage, previewRefreshTrigger, settings.customCDNs])
 
   // Function to update iframe content (optimized to reduce blocking)
   const updateIframe = React.useCallback(() => {

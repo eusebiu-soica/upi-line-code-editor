@@ -64,11 +64,20 @@ export function EditorTabs() {
     }
   }
 
-  // Check if we can close the file (not the last HTML)
+  // Check if we can close the file (not the last HTML, CSS, or JS)
   const canCloseFile = (file: EditorFile) => {
-    if (file.type !== "html") return true
-    const htmlFiles = files.filter((f) => f.type === "html")
-    return htmlFiles.length > 1
+    // Don't allow closing default files
+    if (file.id.startsWith("default-")) {
+      return false
+    }
+    
+    // For HTML files, check if it's the last one
+    if (file.type === "html") {
+      const htmlFiles = files.filter((f) => f.type === "html")
+      return htmlFiles.length > 1
+    }
+    
+    return true
   }
 
   return (
