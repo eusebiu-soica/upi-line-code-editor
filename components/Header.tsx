@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { LayoutIcon, EyeIcon, FileCode, Folder, FolderArchive, LayoutDashboard, Eye, EyeOff, LayoutGrid, Terminal, Monitor, Settings as SettingsIcon } from "lucide-react"
+import { LayoutIcon, EyeIcon, FileCode, Folder, FolderArchive, LayoutDashboard, Eye, EyeOff, LayoutGrid, Terminal, Monitor, Settings as SettingsIcon, Menu, Moon, Sun } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-nobile"
 import {
@@ -18,13 +18,16 @@ import { Input } from "@/components/ui/input"
 import { ThemeToggle } from "./theme-toggle"
 import { Download } from "./DownloadButton"
 import Image from "next/image"
-import logo from '@/public/logo.png'
+import logoWhite from '@/public/Logo-white.png'
+import logoBlack from '@/public/Logo-black.png'
+import { useTheme } from "next-themes"
 import { InputGroupTooltip } from "./InputGroup"
 import { useFiles } from "@/contexts/FileContext"
 import { openFile, openFolder, openZip } from "@/lib/file-utils"
 import { toast } from "sonner"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Badge } from "@/components/ui/badge"
+import { Label } from "@/components/ui/label"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,12 +39,37 @@ import { LayoutOrientation, LayoutPosition } from "@/contexts/FileContext"
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Split } from "lucide-react"
 import { CompareCodeModal } from "@/components/CompareCodeModal"
 import { Settings } from "@/components/Settings"
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer"
 
 export function Header() {
   const isMobile = useIsMobile()
+  const { theme, resolvedTheme, setTheme } = useTheme()
   const { openFile: addFile, openFiles: addFiles, livePreview, toggleLivePreview, addImage, layoutOrientation, layoutPosition, setLayout, showConsole, toggleConsole, viewportEnabled, toggleViewport } = useFiles()
   const [compareModalOpen, setCompareModalOpen] = React.useState(false)
   const [settingsOpen, setSettingsOpen] = React.useState(false)
+  const [mounted, setMounted] = React.useState(false)
+  const [drawerOpen, setDrawerOpen] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Determine which logo to use based on theme
+  const logo = React.useMemo(() => {
+    if (!mounted) return logoBlack // Default to black during SSR
+    const currentTheme = resolvedTheme || theme || "system"
+    const isDark = currentTheme === "dark" || (currentTheme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
+    return isDark ? logoWhite : logoBlack
+  }, [mounted, resolvedTheme, theme])
 
   const handleToggleLivePreview = () => {
     toggleLivePreview()
@@ -124,16 +152,18 @@ export function Header() {
     <div className="flex flex-row items-center justify-between w-full p-2 sm:p-4 px-3 sm:px-6 shadow-sm border-b bg-background gap-2 relative z-50">
       {/* Left section: Logo and Navigation (hidden on mobile) */}
       <div className="hidden md:flex gap-2 items-center shrink-0">
-        <div className="mr-4 lg:mr-6">
-          <Image 
-            src={logo} 
-            alt="Upi-Line Code Editor Logo" 
-            width={35} 
-            height={35} 
-            className="w-8 h-9! lg:w-[35px] lg:h-[35px]"
-            priority
-            loading="eager"
-          />
+        <div className="mr-2 lg:mr-3">
+          {mounted && (
+            <Image 
+              src={logo} 
+              alt="Upi-Line Code Editor Logo" 
+              width={35} 
+              height={35} 
+              className="w-8 h-9! lg:w-[35px] lg:h-[35px]"
+              priority
+              loading="eager"
+            />
+          )}
         </div>
         <NavigationMenu viewport={isMobile}>
           <NavigationMenuList className="flex-wrap">
@@ -167,15 +197,17 @@ export function Header() {
 
       {/* Mobile menu button (only on mobile/tablet under 1024px) */}
       <div className="md:hidden flex items-center gap-2">
-        <Image 
-          src={logo} 
-          alt="Upi-Line Code Editor Logo" 
-          width={28} 
-          height={28} 
-          className="w-7 h-7"
-          priority
-          loading="eager"
-        />
+        {mounted && (
+          <Image 
+            src={logo} 
+            alt="Upi-Line Code Editor Logo" 
+            width={28} 
+            height={28} 
+            className="w-7 h-7"
+            priority
+            loading="eager"
+          />
+        )}
         <NavigationMenu>
           <NavigationMenuList>
             <NavigationMenuItem>
@@ -323,67 +355,93 @@ export function Header() {
           </Tooltip>
         </div>
 
-        {/* Mobile: Essential buttons including terminal */}
-        <div className="sm:hidden flex items-center gap-1">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant={showConsole ? "default" : "ghost"}
-                size="icon"
-                className="h-8 w-8 relative"
-                onClick={toggleConsole}
-                aria-label={showConsole ? "Hide console" : "Show console"}
-              >
-                <Terminal className="w-4 h-4" aria-hidden="true" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{showConsole ? "Hide console" : "Show console"}</p>
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                className="h-8 w-8 relative"
-                onClick={handleToggleLivePreview}
-                aria-label={livePreview ? "Disable live preview" : "Enable live preview"}
-              >
-                {livePreview ? <Eye className="w-4 h-4" aria-hidden="true" /> : <EyeOff className="w-4 h-4" aria-hidden="true" />}
-                <Badge 
-                  className={`absolute -top-1 -right-1 h-2 w-2 p-0 border-0 ${livePreview ? 'bg-green-500' : 'bg-red-500'}`}
-                  variant="default"
-                  aria-hidden="true"
-                />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{livePreview ? "Disable live preview" : "Enable live preview"}</p>
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant={viewportEnabled ? "default" : "ghost"}
-                size="icon"
-                className="h-8 w-8"
-                onClick={toggleViewport}
-                aria-label={viewportEnabled ? "Disable responsive viewport" : "Enable responsive viewport"}
-              >
-                <Monitor className="w-4 h-4" aria-hidden="true" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{viewportEnabled ? "Disable responsive viewport" : "Enable responsive viewport"}</p>
-            </TooltipContent>
-          </Tooltip>
-          <ThemeToggle />
-        </div>
 
         {/* Download button */}
         <div className="ml-1 sm:ml-2 lg:ml-6">
           <Download />
+        </div>
+
+        {/* Mobile: Drawer with menu, theme, and settings */}
+        <div className="sm:hidden flex items-center gap-1 ml-3">
+          <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+            <DrawerTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Menu className="w-4 h-4" aria-hidden="true" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </DrawerTrigger>
+            <DrawerContent>
+              <DrawerHeader>
+                <DrawerTitle>Menu</DrawerTitle>
+                <DrawerDescription>Access theme and settings</DrawerDescription>
+              </DrawerHeader>
+              <div className="p-4 space-y-4">
+                {/* Theme Toggle */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold">Theme</Label>
+                  <div className="flex flex-col gap-2">
+                    {mounted && (
+                      <>
+                        <Button
+                          variant={(resolvedTheme || theme) === "light" ? "default" : "outline"}
+                          className="w-full justify-start"
+                          onClick={() => {
+                            setTheme("light")
+                            setDrawerOpen(false)
+                          }}
+                        >
+                          <Sun className="w-4 h-4 mr-2" />
+                          Light
+                        </Button>
+                        <Button
+                          variant={(resolvedTheme || theme) === "dark" ? "default" : "outline"}
+                          className="w-full justify-start"
+                          onClick={() => {
+                            setTheme("dark")
+                            setDrawerOpen(false)
+                          }}
+                        >
+                          <Moon className="w-4 h-4 mr-2" />
+                          Dark
+                        </Button>
+                        <Button
+                          variant={(resolvedTheme || theme) === "system" || ((resolvedTheme || theme) !== "light" && (resolvedTheme || theme) !== "dark") ? "default" : "outline"}
+                          className="w-full justify-start"
+                          onClick={() => {
+                            setTheme("system")
+                            setDrawerOpen(false)
+                          }}
+                        >
+                          <Monitor className="w-4 h-4 mr-2" />
+                          System
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+                {/* Settings Button */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold">Settings</Label>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      setSettingsOpen(true)
+                      setDrawerOpen(false)
+                    }}
+                  >
+                    <SettingsIcon className="w-4 h-4 mr-2" />
+                    Open Settings
+                  </Button>
+                </div>
+              </div>
+              <DrawerFooter>
+                <DrawerClose asChild>
+                  <Button variant="outline">Close</Button>
+                </DrawerClose>
+              </DrawerFooter>
+            </DrawerContent>
+          </Drawer>
         </div>
       </div>
 

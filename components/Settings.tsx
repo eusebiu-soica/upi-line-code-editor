@@ -38,6 +38,7 @@ import { Separator } from "@/components/ui/separator"
 import { useSettings, type Settings } from "@/contexts/SettingsContext"
 import { useTheme } from "next-themes"
 import { useFiles } from "@/contexts/FileContext"
+import { useIsMobile } from "@/hooks/use-nobile"
 import {
   Settings as SettingsIcon,
   Eye,
@@ -93,6 +94,7 @@ export function Settings({ open, onOpenChange }: SettingsProps) {
   const { settings, updateSetting, resetSettings, addCustomCDN, removeCustomCDN, clearLocalStorage } = useSettings()
   const { setTheme, theme } = useTheme()
   const { toggleLivePreview, livePreview, setLayout } = useFiles()
+  const isMobile = useIsMobile()
   const [activeSection, setActiveSection] = React.useState<SectionId>("general")
   const [newCDN, setNewCDN] = React.useState("")
   const [mounted, setMounted] = React.useState(false)
@@ -156,19 +158,19 @@ export function Settings({ open, onOpenChange }: SettingsProps) {
 
   const renderGeneralSettings = () => (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
+      <div className={cn("gap-4", isMobile ? "flex flex-col" : "flex items-center justify-between")}>
         <div className="flex-1">
           <Label className="text-base font-semibold">Default Live Preview</Label>
           <p className="text-sm text-muted-foreground mt-1">
             Automatically enable live preview when the editor starts
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className={cn("flex items-center gap-2", isMobile && "w-full")}>
           <Button
             variant={settings.defaultLivePreview ? "default" : "outline"}
             size="sm"
             onClick={() => handleLivePreviewChange(true)}
-            className="flex items-center gap-2"
+            className={cn("flex items-center gap-2", isMobile && "flex-1")}
           >
             <Eye className="w-4 h-4" />
             On
@@ -177,7 +179,7 @@ export function Settings({ open, onOpenChange }: SettingsProps) {
             variant={!settings.defaultLivePreview ? "default" : "outline"}
             size="sm"
             onClick={() => handleLivePreviewChange(false)}
-            className="flex items-center gap-2"
+            className={cn("flex items-center gap-2", isMobile && "flex-1")}
           >
             <EyeOff className="w-4 h-4" />
             Off
@@ -187,14 +189,14 @@ export function Settings({ open, onOpenChange }: SettingsProps) {
 
       <Separator />
 
-      <div className="flex items-center justify-between gap-4">
+      <div className={cn("gap-4", isMobile ? "flex flex-col" : "flex items-center justify-between")}>
         <div className="flex-1">
           <Label className="text-base font-semibold">Default Theme</Label>
           <p className="text-sm text-muted-foreground mt-1">
             Choose your preferred color theme
           </p>
         </div>
-        <div className="w-48">
+        <div className={cn(isMobile ? "w-full" : "w-48")}>
           {mounted && (
             <Select
               value={settings.defaultTheme}
@@ -230,18 +232,19 @@ export function Settings({ open, onOpenChange }: SettingsProps) {
 
       <Separator />
 
-      <div className="flex items-center justify-between gap-4">
+      <div className={cn("gap-4", isMobile ? "flex flex-col" : "flex items-center justify-between")}>
         <div className="flex-1">
           <Label className="text-base font-semibold">Auto-save to LocalStorage</Label>
           <p className="text-sm text-muted-foreground mt-1">
             Automatically save your code to browser localStorage
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className={cn("flex items-center gap-2", isMobile && "w-full")}>
           <Button
             variant={settings.autoSaveToLocalStorage ? "default" : "outline"}
             size="sm"
             onClick={() => handleAutoSaveChange(true)}
+            className={cn(isMobile && "flex-1")}
           >
             Enable
           </Button>
@@ -249,6 +252,7 @@ export function Settings({ open, onOpenChange }: SettingsProps) {
             variant={!settings.autoSaveToLocalStorage ? "default" : "outline"}
             size="sm"
             onClick={() => handleAutoSaveChange(false)}
+            className={cn(isMobile && "flex-1")}
           >
             Disable
           </Button>
@@ -257,14 +261,14 @@ export function Settings({ open, onOpenChange }: SettingsProps) {
 
       <Separator />
 
-      <div className="flex items-center justify-between gap-4">
+      <div className={cn("gap-4", isMobile ? "flex flex-col" : "flex items-center justify-between")}>
         <div className="flex-1">
           <Label className="text-base font-semibold">Website Color Scheme</Label>
           <p className="text-sm text-muted-foreground mt-1">
             Choose the primary color scheme for the entire website
           </p>
         </div>
-        <div className="w-48">
+        <div className={cn(isMobile ? "w-full" : "w-48")}>
           {mounted && (
             <Select
               value={settings.websiteColorScheme}
@@ -292,7 +296,7 @@ export function Settings({ open, onOpenChange }: SettingsProps) {
 
   const renderEditorSettings = () => (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
+      <div className={cn("gap-4", isMobile ? "flex flex-col" : "flex items-center justify-between")}>
         <div className="flex-1">
           <Label htmlFor="fontSize" className="text-base font-semibold">
             Font Size
@@ -301,7 +305,7 @@ export function Settings({ open, onOpenChange }: SettingsProps) {
             Adjust the editor font size (10-24px)
           </p>
         </div>
-        <div className="w-32">
+        <div className={cn(isMobile ? "w-full" : "w-32")}>
           <Input
             id="fontSize"
             type="number"
@@ -315,7 +319,7 @@ export function Settings({ open, onOpenChange }: SettingsProps) {
 
       <Separator />
 
-      <div className="flex items-center justify-between gap-4">
+      <div className={cn("gap-4", isMobile ? "flex flex-col" : "flex items-center justify-between")}>
         <div className="flex-1">
           <Label htmlFor="tabSize" className="text-base font-semibold">
             Tab Size
@@ -324,7 +328,7 @@ export function Settings({ open, onOpenChange }: SettingsProps) {
             Number of spaces for indentation (1-8)
           </p>
         </div>
-        <div className="w-32">
+        <div className={cn(isMobile ? "w-full" : "w-32")}>
           <Input
             id="tabSize"
             type="number"
@@ -338,18 +342,19 @@ export function Settings({ open, onOpenChange }: SettingsProps) {
 
       <Separator />
 
-      <div className="flex items-center justify-between gap-4">
+      <div className={cn("gap-4", isMobile ? "flex flex-col" : "flex items-center justify-between")}>
         <div className="flex-1">
           <Label className="text-base font-semibold">Word Wrap</Label>
           <p className="text-sm text-muted-foreground mt-1">
             Enable word wrapping in the editor
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className={cn("flex items-center gap-2", isMobile && "w-full")}>
           <Button
             variant={settings.editorWordWrap ? "default" : "outline"}
             size="sm"
             onClick={() => updateSetting("editorWordWrap", true)}
+            className={cn(isMobile && "flex-1")}
           >
             Enable
           </Button>
@@ -357,6 +362,7 @@ export function Settings({ open, onOpenChange }: SettingsProps) {
             variant={!settings.editorWordWrap ? "default" : "outline"}
             size="sm"
             onClick={() => updateSetting("editorWordWrap", false)}
+            className={cn(isMobile && "flex-1")}
           >
             Disable
           </Button>
@@ -365,18 +371,19 @@ export function Settings({ open, onOpenChange }: SettingsProps) {
 
       <Separator />
 
-      <div className="flex items-center justify-between gap-4">
+      <div className={cn("gap-4", isMobile ? "flex flex-col" : "flex items-center justify-between")}>
         <div className="flex-1">
           <Label className="text-base font-semibold">Minimap</Label>
           <p className="text-sm text-muted-foreground mt-1">
             Show code minimap in the editor
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className={cn("flex items-center gap-2", isMobile && "w-full")}>
           <Button
             variant={settings.editorMinimap ? "default" : "outline"}
             size="sm"
             onClick={() => updateSetting("editorMinimap", true)}
+            className={cn(isMobile && "flex-1")}
           >
             Show
           </Button>
@@ -384,6 +391,7 @@ export function Settings({ open, onOpenChange }: SettingsProps) {
             variant={!settings.editorMinimap ? "default" : "outline"}
             size="sm"
             onClick={() => updateSetting("editorMinimap", false)}
+            className={cn(isMobile && "flex-1")}
           >
             Hide
           </Button>
@@ -399,17 +407,17 @@ export function Settings({ open, onOpenChange }: SettingsProps) {
 
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between gap-4">
+        <div className={cn("gap-4", isMobile ? "flex flex-col" : "flex items-center justify-between")}>
           <div className="flex-1">
             <Label className="text-base font-semibold">Default Layout Position</Label>
             <p className="text-sm text-muted-foreground mt-1">
               Default preview position when the editor starts
             </p>
           </div>
-          <div>
+          <div className={cn(isMobile && "w-full")}>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-[280px] justify-start">
+                <Button variant="outline" className={cn("justify-start", isMobile ? "w-full" : "w-[280px]")}>
                   <LayoutGrid className="w-4 h-4 mr-2" />
                   {settings.defaultLayoutPosition === "preview-top" && "Preview Top"}
                   {settings.defaultLayoutPosition === "preview-bottom" && "Preview Bottom"}
@@ -417,7 +425,7 @@ export function Settings({ open, onOpenChange }: SettingsProps) {
                   {settings.defaultLayoutPosition === "preview-right" && "Preview Right"}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[280px]">
+              <DropdownMenuContent align={isMobile ? "start" : "end"} className={cn(isMobile ? "w-[calc(100vw-3rem)]" : "w-[280px]")}>
                 <DropdownMenuGroup className="space-y-1">
                   <DropdownMenuItem
                     onClick={() => {
@@ -529,15 +537,15 @@ export function Settings({ open, onOpenChange }: SettingsProps) {
 
       <Separator />
 
-      <div className="flex items-center justify-between gap-4">
+      <div className={cn("gap-4", isMobile ? "flex flex-col" : "flex items-center justify-between")}>
         <div className="flex-1">
           <Label className="text-base font-semibold">Reset Settings</Label>
           <p className="text-sm text-muted-foreground mt-1">
             Reset all settings to their default values
           </p>
         </div>
-        <div>
-          <Button variant="destructive" onClick={handleReset} className="flex items-center gap-2">
+        <div className={cn(isMobile && "w-full")}>
+          <Button variant="destructive" onClick={handleReset} className={cn("flex items-center gap-2", isMobile && "w-full")}>
             <RotateCcw className="w-4 h-4" />
             Reset All Settings
           </Button>
@@ -546,15 +554,15 @@ export function Settings({ open, onOpenChange }: SettingsProps) {
 
       <Separator />
 
-      <div className="flex items-center justify-between gap-4">
+      <div className={cn("gap-4", isMobile ? "flex flex-col" : "flex items-center justify-between")}>
         <div className="flex-1">
           <Label className="text-base font-semibold">Clear LocalStorage</Label>
           <p className="text-sm text-muted-foreground mt-1">
             Clear all saved settings and files from browser localStorage
           </p>
         </div>
-        <div>
-          <Button variant="destructive" onClick={() => setClearStorageOpen(true)} className="flex items-center gap-2">
+        <div className={cn(isMobile && "w-full")}>
+          <Button variant="destructive" onClick={() => setClearStorageOpen(true)} className={cn("flex items-center gap-2", isMobile && "w-full")}>
             <Trash2 className="w-4 h-4" />
             Clear LocalStorage
           </Button>
@@ -879,39 +887,67 @@ export function Settings({ open, onOpenChange }: SettingsProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl h-[85vh] p-0 flex flex-col">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b">
+      <DialogContent className={cn(
+        "p-0 flex flex-col",
+        isMobile ? "max-w-full h-full m-0 rounded-none" : "max-w-4xl h-[85vh]"
+      )}>
+        <DialogHeader className={cn("border-b", isMobile ? "px-4 pt-4 pb-3" : "px-6 pt-6 pb-4")}>
           <DialogTitle className="flex items-center gap-2">
             <SettingsIcon className="w-5 h-5" />
             Settings
           </DialogTitle>
         </DialogHeader>
-        <div className="flex flex-1 overflow-hidden">
+        <div className={cn("flex flex-1 overflow-hidden", isMobile && "flex-col")}>
           {/* Sidebar Navigation */}
-          <div className="w-64 border-r bg-muted/30 p-4 overflow-y-auto">
-            <nav className="space-y-1">
-              {SETTINGS_SECTIONS.map((section) => {
-                const Icon = section.icon
-                return (
-                  <button
-                    key={section.id}
-                    onClick={() => setActiveSection(section.id)}
-                    className={cn(
-                      "w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                      activeSection === section.id
-                        ? "bg-primary text-primary-foreground"
-                        : "hover:bg-accent hover:text-accent-foreground"
-                    )}
-                  >
-                    <Icon className="w-4 h-4" />
-                    {section.label}
-                  </button>
-                )
-              })}
-            </nav>
-          </div>
+          {isMobile ? (
+            <div className="border-b bg-muted/30 overflow-x-auto">
+              <nav className="flex space-x-1 p-2">
+                {SETTINGS_SECTIONS.map((section) => {
+                  const Icon = section.icon
+                  return (
+                    <button
+                      key={section.id}
+                      onClick={() => setActiveSection(section.id)}
+                      className={cn(
+                        "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap shrink-0",
+                        activeSection === section.id
+                          ? "bg-primary text-primary-foreground"
+                          : "hover:bg-accent hover:text-accent-foreground"
+                      )}
+                    >
+                      <Icon className="w-4 h-4" />
+                      {section.label}
+                    </button>
+                  )
+                })}
+              </nav>
+            </div>
+          ) : (
+            <div className="w-64 border-r bg-muted/30 p-4 overflow-y-auto">
+              <nav className="space-y-1">
+                {SETTINGS_SECTIONS.map((section) => {
+                  const Icon = section.icon
+                  return (
+                    <button
+                      key={section.id}
+                      onClick={() => setActiveSection(section.id)}
+                      className={cn(
+                        "w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                        activeSection === section.id
+                          ? "bg-primary text-primary-foreground"
+                          : "hover:bg-accent hover:text-accent-foreground"
+                      )}
+                    >
+                      <Icon className="w-4 h-4" />
+                      {section.label}
+                    </button>
+                  )
+                })}
+              </nav>
+            </div>
+          )}
           {/* Content Area */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className={cn("flex-1 overflow-y-auto", isMobile ? "p-4" : "p-6")}>
             {renderContent()}
           </div>
         </div>
