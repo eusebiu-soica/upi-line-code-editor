@@ -156,12 +156,13 @@ export function Header() {
           {mounted && (
             <Image 
               src={logo} 
-              alt="Upi-Line Code Editor Logo" 
+              alt="Upi Line Code Editor - Free Online HTML, CSS, JavaScript Editor with Live Preview" 
               width={35} 
               height={35} 
               className="w-8 h-9! lg:w-[35px] lg:h-[35px]"
               priority
               loading="eager"
+              title="Upi Line Code Editor"
             />
           )}
         </div>
@@ -200,12 +201,13 @@ export function Header() {
         {mounted && (
           <Image 
             src={logo} 
-            alt="Upi-Line Code Editor Logo" 
+            alt="Upi Line Code Editor - Free Online HTML, CSS, JavaScript Editor with Live Preview" 
             width={28} 
             height={28} 
             className="w-7 h-7"
             priority
             loading="eager"
+            title="Upi Line Code Editor"
           />
         )}
         <NavigationMenu>

@@ -1,6 +1,7 @@
 {
-  "name": "Upi Line | Code Editor",
+  "name": "Upi Line | Code Editor - Free Online HTML, CSS, JavaScript Editor",
   "short_name": "Upi Line",
+  "description": "Free online code editor with live preview for HTML, CSS, and JavaScript. Built with Monaco Editor, includes Tailwind CSS, jQuery support, and responsive device preview.",
   "icons": [
     {
       "src": "icons/icon-48x48.png",
